@@ -13,8 +13,9 @@ oc get pods              #-- there should be Bookinfo pods
 ```
 3. Environment Variables
 ```bash
-export BOOKINFO_NAMESPACE=bookinfo
+export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
 export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
+export BOOKINFO_NAMESPACE=bookinfo
 ```
 
 ## Traffic Management
