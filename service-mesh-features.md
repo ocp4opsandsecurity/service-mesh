@@ -2,25 +2,35 @@
 How to that explores many of the powerful Service Mesh features
 
 ## Assumptions
-1. Red Hat OpenShift Service Mesh is installed using the proceedure detailed in [Service Mesh Install](service-mesh-install.md)
+1. Red Hat OpenShift Service Mesh is installed using the proceedure in [Service Mesh Install](service-mesh-install.md).
+
+2. The bookinfo application topology should consist of the following resources.
+```bash
+oc get virtualservices   #-- there should be virtual services: bookinfo
+oc get destinationrules  #-- there should be destination rules: details, ratings, and revies 
+oc get gateway           #-- there should be a gateway: bookinfo-gateway
+oc get pods              #-- there should be Bookinfo pods 
+```
 
 ## Traffic Management
+Traffic routing lets you control the flow of traffic between services.
 
 ### Request Routing
-1. Deploy `reviews v2` see the BLACK Stars
+Configure dynamic request routing to multiple versions of a microservice. To demonstrate, we will deploy
+both `reiews v2` and `reviews v3` along side `review v1` of the reviews service. Watch the traffic dynamically 
+switch between service versions as you refresh the product page in your browser.
+
+1. Deploy `reviews v2` service and refresh the product page until you see BLACK star reviews:
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2
 ```
 
-2. Deploy `reviews v3` see the RED Stars
+2. Deploy `reviews v3` service and refresh the product page until you see RED star reviews:
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
 ```
 
 ## References
-
-### Operator API
-- [Subscription](https://docs.openshift.com/container-platform/4.6/rest_api/operatorhub_apis/subscription-operators-coreos-com-v1alpha1.html)
 
 ### Red Hat OpenShift
 - [Red Hat OpenShift Command Line Tools](https://docs.openshift.com/container-platform/4.6/cli_reference/openshift_cli/getting-started-cli.html#cli-about-cli_cli-developer-commands)
