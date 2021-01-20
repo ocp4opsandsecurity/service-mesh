@@ -3,7 +3,7 @@
 ########################
 # include the magic
 ########################
-. ./demo-magic.sh
+. ./demo-magic.sh -n
 
 
 ########################
@@ -13,7 +13,7 @@
 #
 # speed at which to simulate typing. bigger num = faster
 #
-TYPE_SPEED=100
+TYPE_SPEED=150
 
 #
 # custom prompt
@@ -37,7 +37,7 @@ export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maist
 export GATEWAY_CONFIG=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
 
 # Deploy ElasticSearch Operator
-oc apply -n openshift-operators -f- <<EOF
+p "oc apply -n openshift-operators -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -49,10 +49,10 @@ spec:
   name: elasticsearch-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-EOF
+EOF"
 
-# Deploy Jaeger Operator
-oc apply -n openshift-operators -f- <<EOF
+p "Deploy Jaeger Operator"
+pe "oc apply -n openshift-operators -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -65,10 +65,10 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   startingCSV: jaeger-operator.v1.20.2
-EOF
+EOF"
 
-# Deploy Kiali Operator
-oc apply -n openshift-operators -f- <<EOF
+p "Deploy Kiali Operator"
+pe "oc apply -n openshift-operators -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -81,10 +81,10 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   startingCSV: kiali-operator.v1.24.4
-EOF
+EOF"
 
-# Deploy Service Mesh Operator
-oc apply -n openshift-operators -f- <<EOF
+p "Deploy Service Mesh Operator"
+p "oc apply -n openshift-operators -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -97,13 +97,16 @@ spec:
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   startingCSV: servicemeshoperator.v2.0.1.1
-EOF
+EOF"
 
-# Create control plane namespace
-oc new-project $CONTROL_PLANE_NAMESPACE
+p "Give the operators time to come up"
+pe "sleep 20"
 
-# Deploy Tools
-oc apply -n $CONTROL_PLANE_NAMESPACE -f- <<EOF
+p "Create control plane namespace"
+pe "oc new-project $CONTROL_PLANE_NAMESPACE"
+
+p "Deploy Tools"
+pe "oc apply -n $CONTROL_PLANE_NAMESPACE -f- <<EOF
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
@@ -125,16 +128,16 @@ spec:
       name: kiali
     grafana:
       enabled: true
-EOF
+EOF"
 
-# Verify the service mesh is running
-oc get smcp -n $CONTROL_PLANE_NAMESPACE
+p "Verify the service mesh is running"
+pe "oc get smcp -n $CONTROL_PLANE_NAMESPACE"
 
-# Create the bookinfo namespace
-oc new-project $BOOKINFO_NAMESPACE
+p "Create the bookinfo namespace"
+pe "oc new-project $BOOKINFO_NAMESPACE"
 
-# Create the Service Mesh Member Roll
-oc apply -n ${CONTROL_PLANE_NAMESPACE} -f- <<EOF
+p "Create the Service Mesh Member Roll"
+pe "oc apply -n ${CONTROL_PLANE_NAMESPACE} -f- <<EOF
 apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
 metadata:
@@ -144,13 +147,13 @@ spec:
   members:
     # a list of projects joined into the service mesh
     - ${BOOKINFO_NAMESPACE}
-EOF
+EOF"
 
-# Create a service mesh user for the bookinfo namespace
-oc create user $BOOKINFO_MESH_USER
+p "Create a service mesh user for the bookinfo namespace"
+pe "oc create user $BOOKINFO_MESH_USER"
 
-# Create a service mesh roll binding between the servic mesh users and the control plane
-oc apply -n ${CONTROL_PLANE_NAMESPACE} -f- <<EOF
+p "Create a service mesh roll binding between the servic mesh users and the control plane"
+pe "oc apply -n ${CONTROL_PLANE_NAMESPACE} -f- <<EOF
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -164,39 +167,34 @@ subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: User
   name: ${BOOKINFO_MESH_USER}
+EOF"
 
-# Deploy the bookinfo appliacation
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews            # reviews Service 
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=reviews            # reviews ServiceAccount 
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v1     # reviews-v1 Deployment
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=ratings            # ratings Service
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=ratings            # ratings ServiceAccount
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1     # ratings-v1 Deployment
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=details            # details Service
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=details            # details ServiceAccount
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=details,version=v1     # details-v1 Deployment
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=productpage        # productpage Service
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=productpage        # productpage ServiceAccount
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=productpage,version=v1 # productpage-v1 Deployment
+p "Deploy the bookinfo appliacation"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews"            # reviews Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=reviews"            # reviews ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v1"     # reviews-v1 Deployment
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=ratings"            # ratings Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=ratings"            # ratings ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1"     # ratings-v1 Deployment
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=details"            # details Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=details"            # details ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=details,version=v1"     # details-v1 Deployment
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=productpage"        # productpage Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=productpage"        # productpage ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=productpage,version=v1" # productpage-v1 Deployment
 
-# Deploy the service mesh gateway
-oc apply -n $BOOKINFO_NAMESPACE -f $GATEWAY_CONFIG 
-export GATEWAY_URL=$(oc -n $CONTROL_PLANE_NAMESPACE get route istio-ingressgateway -o jsonpath='{.spec.host}') 
+p "Deploy the service mesh gateway"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $GATEWAY_CONFIG"
 
-# Deploy the service mesh destination rules
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES
+p "Deploy the service mesh destination rules"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES"
 
-clear
-echo "GATEWAY_URL: $GATEWAY_URL
-curl -o /dev/null -s -w "%{http_code}\n" http://$GATEWAY_URL/productpage
+pe "export GATEWAY_URL=$(oc -n $CONTROL_PLANE_NAMESPACE get route istio-ingressgateway -o jsonpath='{.spec.host}')"
+p "GATEWAY_URL: $GATEWAY_URL"
+pe "oc get route -n $CONTROL_PLANE_NAMESPACE"       #-- there should be jeager, kiali, prometheous
+pe "oc get virtualservices -n $BOOKINFO_NAMESPACE"  #-- there should be virtual services: bookinfo
+pe "oc get destinationrules -n $BOOKINFO_NAMESPACE" #-- there should be destination rules: details, ratings, and revies
+pe "oc get gateway -n $BOOKINFO_NAMESPACE"          #-- there should be a gateway: bookinfo-gateway
+pe "oc get pods -n $BOOKINFO_NAMESPACE"             #-- there should be Bookinfo pods
 
-# Verify the install
-oc get route -n $CONTROL_PLANE_NAMESPACE       #-- there should be jeager, kiali, prometheous
-oc get virtualservices -n $BOOKINFO_NAMESPACE  #-- there should be virtual services: bookinfo
-oc get destinationrules -n $BOOKINFO_NAMESPACE #-- there should be destination rules: details, ratings, and revies
-oc get gateway -n $BOOKINFO_NAMESPACE          #-- there should be a gateway: bookinfo-gateway
-oc get pods -n $BOOKINFO_NAMESPACE             #-- there should be Bookinfo pods
 
-# show a prompt so as not to reveal our true nature after
-# the quick-start has concluded
-p ""
