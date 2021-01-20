@@ -108,9 +108,9 @@ curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.s
      --output demo-magic.sh
 ```
 
-2. Download walk through script using the following command:
+2. Download the walk-through script using the following command:
 ```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features.sh \
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-walk-through.sh \
      --output service-mesh-features-walk-through.sh
 ```
 
@@ -120,7 +120,7 @@ sh ./service-mesh-features-walk-through.sh
 ```
 
 ## Install Quick-Start
-Use this quick-start to install, deploy, and configure Red Hat OpenShift Service Mesh as described in the [Service Mesh Install](service-mesh-install.md) how-to.
+Use this `quick-start` to install, deploy, and configure this how-to's flavor of a Red Hat OpenShift Service Mesh deployment.
 
 **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
 
@@ -130,15 +130,15 @@ curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.s
      --output demo-magic.sh
 ```
 
-2. Download walk through script using the following command:
+2. Download the quick-start script using the following command:
 ```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-install-quick-start.sh \
-     --output service-mesh-install-quick-start.sh
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-quick-start.sh \
+     --output service-mesh-features-quick-start.sh
 ```
 
-3. Execute the walk through using the following command:
+3. Execute the quick-start using the following command:
 ```bash
-sh ./service-mesh-install-quick-start.sh
+sh ./service-mesh-features-quick-start.sh
 ```
 
 ## References
