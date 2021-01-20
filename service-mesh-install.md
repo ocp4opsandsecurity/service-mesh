@@ -15,7 +15,7 @@ Use the [Walk-Through](#walk-through) if you are in a hurry.
 - [Walk-Through](#walk-through)
 
 ## Operator Installation
-To install the Operator, log in to the OpenShift Container Platform as a user with the cluster-admin role.
+To install the operators, you must log in to the OpenShift Container Platform as a user with the cluster-admin role.
 
 ### Assumptions
 - Access to the `oc command`
