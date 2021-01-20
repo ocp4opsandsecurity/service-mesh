@@ -1,5 +1,8 @@
 # service-mesh-features
+How to that explores many of the powerful Service Mesh features
 
+## Assumptions
+1. Red Hat OpenShift Service Mesh is installed using the proceedure detailed in [Service Mesh Install](service-mesh-install.md)
 
 ## Traffic Management
 
