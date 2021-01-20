@@ -382,7 +382,7 @@ oc get route -n $CONTROL_PLANE_NAMESPACE
 
 1. Download demo-magic script using the following commands:
 ```bash
-curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.sh \
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
 ```
 
@@ -411,3 +411,4 @@ sh ./service-mesh-install-walk-through.sh
 
 ## Trouble Shooting
 - [Unable To Delete Namespace](https://access.redhat.com/solutions/4165791)
+

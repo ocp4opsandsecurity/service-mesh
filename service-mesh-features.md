@@ -126,7 +126,7 @@ Use this `quick-start` to install, deploy, and configure this how-to's flavor of
 
 1. Download demo-magic script using the following commands:
 ```bash
-curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.sh \
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
 ```
 
