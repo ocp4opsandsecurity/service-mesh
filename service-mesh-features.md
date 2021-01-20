@@ -1,8 +1,14 @@
 # service-mesh-features
-How to that explores many of the powerful Service Mesh features
+How to that explores many of the powerful Service Mesh features.
+
+- [Assumptions](#assumptions)
+- [Traffic Management](#traffic-management)
+  - [Request Routing](#request-routing)
+- [Walk-Through](#walk-through)
+- [Quick-Start](#quick-start)
 
 ## Assumptions
-1. Red Hat OpenShift Service Mesh is installed using the proceedure in [Service Mesh Install](service-mesh-install.md).
+1. Red Hat OpenShift Service Mesh is installed using the proceedure described in [Service Mesh Install](service-mesh-install.md). See the [Service Mesh Install Quick Start](#service-mesh-install-quick-start.sh) if you want to quickly install a compliant instance of our Service Mesh how-to baseline deployment.
 
 2. The bookinfo application topology should consist of the following resources.
 ```bash
@@ -40,11 +46,8 @@ oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
 ```
-
-#### Virtual Serivices
-To route requests to a single microservie version only, apply `virtual services` that sets the default version.
-
-1. 
+.
+4. To route requests to a single destination subset, `v1`, only use the following command:
 ```bash
 oc apply -f- <<EOF
 - apiVersion: networking.istio.io/v1beta1
@@ -94,6 +97,49 @@ oc apply -f- <<EOF
 EOF
 ```
 
+## Walk-Through
+Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference application. 
+
+> **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
+
+1. Download demo-magic script using the following commands:
+```bash
+curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.sh \
+     --output demo-magic.sh
+```
+
+2. Download walk through script using the following command:
+```bash
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features.sh \
+     --output service-mesh-features-walk-through.sh
+```
+
+3. Execute the walk-through using the following command:
+```bash
+sh ./service-mesh-features-walk-through.sh
+```
+
+## Install Quick-Start
+Use this quick-start to install, deploy, and configure Red Hat OpenShift Service Mesh as described in the [Service Mesh Install](service-mesh-install.md) how-to.
+
+**Note** `Curl` and `Pipe Viewer` are to be installed on your system.
+
+1. Download demo-magic script using the following commands:
+```bash
+curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.sh \
+     --output demo-magic.sh
+```
+
+2. Download walk through script using the following command:
+```bash
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-install-quick-start.sh \
+     --output service-mesh-install-quick-start.sh
+```
+
+3. Execute the walk through using the following command:
+```bash
+sh ./service-mesh-install-quick-start.sh
+```
 
 ## References
 
