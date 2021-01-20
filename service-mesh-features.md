@@ -19,9 +19,12 @@ oc get pods              #-- there should be Bookinfo pods
 ```
 3. Export Environment Variables
 ```bash
+export CONTROL_PLANE_NAMESPACE=istio-system
+export BOOKINFO_NAMESPACE=bookinfo
+export BOOKINFO_MESH_USER=bookinfo-mesh-user
 export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
 export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
-export BOOKINFO_NAMESPACE=bookinfo
+export GATEWAY_CONFIG=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
 ```
 
 ## Traffic Management
@@ -50,9 +53,10 @@ oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
 4. To route requests to a single destination subset, `v1`, only use the following command:
 ```bash
 oc apply -f- <<EOF
-- apiVersion: networking.istio.io/v1beta1
+  apiVersion: networking.istio.io/v1beta1
   kind: VirtualService
-  ...
+  metadata:
+    name: details
   spec:
     hosts:
     - details
@@ -61,9 +65,11 @@ oc apply -f- <<EOF
       - destination:
           host: details
           subset: v1
-- apiVersion: networking.istio.io/v1beta1
+---
+  apiVersion: networking.istio.io/v1beta1
   kind: VirtualService
-  ...
+  metadata:
+    name: productpage
   spec:
     hosts:
     - productpage
@@ -72,9 +78,11 @@ oc apply -f- <<EOF
       - destination:
           host: productpage
           subset: v1
-- apiVersion: networking.istio.io/v1beta1
+---
+  apiVersion: networking.istio.io/v1beta1
   kind: VirtualService
-  ...
+  metadata:
+    name: ratings
   spec:
     hosts:
     - ratings
@@ -83,9 +91,11 @@ oc apply -f- <<EOF
       - destination:
           host: ratings
           subset: v1
-- apiVersion: networking.istio.io/v1beta1
+---
+  apiVersion: networking.istio.io/v1beta1
   kind: VirtualService
-  ...
+  metadata:
+    name: reviews
   spec:
     hosts:
     - reviews
