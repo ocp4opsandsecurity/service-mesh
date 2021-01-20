@@ -104,7 +104,7 @@ Use this walk-through as an automated guide explore Red Hat Service Mesh feature
 
 1. Download demo-magic script using the following commands:
 ```bash
-curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.sh \
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
 ```
 
