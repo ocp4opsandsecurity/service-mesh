@@ -11,6 +11,11 @@ oc get destinationrules  #-- there should be destination rules: details, ratings
 oc get gateway           #-- there should be a gateway: bookinfo-gateway
 oc get pods              #-- there should be Bookinfo pods 
 ```
+3. Environment Variables
+```bash
+export BOOKINFO_NAMESPACE=bookinfo
+export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
+```
 
 ## Traffic Management
 Traffic routing lets you control the flow of traffic between services.
