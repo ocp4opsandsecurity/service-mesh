@@ -188,9 +188,14 @@ oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES
 
 clear
 echo "GATEWAY_URL: $GATEWAY_URL
-oc get pods -n $BOOKINFO_NAMESPACE
 curl -o /dev/null -s -w "%{http_code}\n" http://$GATEWAY_URL/productpage
-oc get route -n $CONTROL_PLANE_NAMESPACE
+
+# Verify the install
+oc get route -n $CONTROL_PLANE_NAMESPACE       #-- there should be jeager, kiali, prometheous
+oc get virtualservices -n $BOOKINFO_NAMESPACE  #-- there should be virtual services: bookinfo
+oc get destinationrules -n $BOOKINFO_NAMESPACE #-- there should be destination rules: details, ratings, and revies
+oc get gateway -n $BOOKINFO_NAMESPACE          #-- there should be a gateway: bookinfo-gateway
+oc get pods -n $BOOKINFO_NAMESPACE             #-- there should be Bookinfo pods
 
 # show a prompt so as not to reveal our true nature after
 # the quick-start has concluded
