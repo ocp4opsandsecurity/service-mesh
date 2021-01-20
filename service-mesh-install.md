@@ -378,7 +378,7 @@ oc get route -n $CONTROL_PLANE_NAMESPACE
 ```
 
 ## Walk-Through
-Please note that the walk through requires `Curl` and `Pipe Viewer` to be installed on your system.
+**Note** the walk through requires `Curl` and `Pipe Viewer` to be installed on your system.
 
 1. Download demo-magic script using the following commands:
 ```bash
