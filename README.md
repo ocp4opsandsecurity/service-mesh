@@ -388,7 +388,7 @@ curl https://raw.githubusercontent.com/paxtonhare/demo-magic/master/demo-magic.s
 
 2. Download walk through script using the following command:
 ```bash
-curl https://raw.githubusercontent.com/cgfulton/how-to/main/openshift/service-mesh-walk-through.sh \
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install.sh \
      --output service-mesh-install-walk-through.sh
 ```
 
