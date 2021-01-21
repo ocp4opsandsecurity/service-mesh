@@ -109,8 +109,7 @@ pe ""
 clear
 
 p "Create Control Plane Project"
-pe "export CONTROL_PLANE_NAMESPACE=istio-system && \
-oc new-project $CONTROL_PLANE_NAMESPACE"
+pe "oc new-project $CONTROL_PLANE_NAMESPACE"
 pe ""
 clear
 
@@ -147,8 +146,7 @@ pe ""
 clear
 
 p "Create a project for each Service Mesh Member"
-pe "export BOOKINFO_NAMESPACE=bookinfo && \
-oc new-project $BOOKINFO_NAMESPACE"
+pe "oc new-project $BOOKINFO_NAMESPACE"
 pe ""
 clear
 
@@ -168,8 +166,7 @@ pe ""
 clear
 
 p "Create service mesh user"
-pe "export BOOKINFO_MESH_USER=bookinfo-mesh-user && \
-oc create user $BOOKINFO_MESH_USER"
+pe "oc create user $BOOKINFO_MESH_USER"
 pe ""
 clear
 
@@ -209,10 +206,7 @@ pe ""
 clear
 
 p "Create Gateway Deployment"
-pe "export GATEWAY_CONFIG=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
-oc apply -n $BOOKINFO_NAMESPACE -f $GATEWAY_CONFIG && \
-export GATEWAY_URL=$(oc -n $CONTROL_PLANE_NAMESPACE get route istio-ingressgateway -o jsonpath='{.spec.host}') && \
-echo $GATEWAY_URL"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $GATEWAY_CONFIG"
 pe ""
 clear
 
