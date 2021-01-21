@@ -1,9 +1,9 @@
-export CONTROL_PLANE_NAMESPACE=istio-system
-export BOOKINFO_NAMESPACE=bookinfo
-export BOOKINFO_MESH_USER=bookinfo-mesh-user
-export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
-export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
-export GATEWAY_CONFIG=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
+pe "export CONTROL_PLANE_NAMESPACE=istio-system"
+pe "export BOOKINFO_NAMESPACE=bookinfo"
+pe "export BOOKINFO_MESH_USER=bookinfo-mesh-user"
+pe "export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml"
+pe "export BOOKINFO_DEST_RULES_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml"
+pe "export BOOKINFO_GATEWAY_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml"
 
 
 p "Installing the Red Hat Elasticsearch Operator"
@@ -159,313 +159,40 @@ pe ""
 clear
 
 p "Details Deployment"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: details
-  labels:
-    app: details
-    service: details
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: details
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-details
-  labels:
-    account: details
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: details-v1
-  labels:
-    app: details
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: details
-      version: v1
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-        app: details
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-details
-      containers:
-      - name: details
-        image: maistra/examples-bookinfo-details-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
----
-EOF"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=details"        # details Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=details"        # details ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=details,version=v1" # details-v1 Deployment
 pe ""
 clear
 
 p "Ratings Deployment"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: ratings
-  labels:
-    app: ratings
-    service: ratings
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: ratings
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-ratings
-  labels:
-    account: ratings
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ratings-v1
-  labels:
-    app: ratings
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ratings
-      version: v1
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-        app: ratings
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-ratings
-      containers:
-      - name: ratings
-        image: maistra/examples-bookinfo-ratings-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
----
-EOF"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=ratings"        # ratings Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=ratings"        # ratings ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1" # ratings-v1 Deployment
 pe ""
 clear
 
 p "Reviews Deployment"
-pe "oc apply -f- <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: reviews
-  labels:
-    app: reviews
-    service: reviews
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: reviews
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-reviews
-  labels:
-    account: reviews
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: reviews-v1
-  labels:
-    app: reviews
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: reviews
-      version: v1
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-        app: reviews
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-reviews
-      containers:
-      - name: reviews
-        image: maistra/examples-bookinfo-reviews-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: LOG_DIR
-          value: "/tmp/logs"
-        ports:
-        - containerPort: 9080
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: wlp-output
-          mountPath: /opt/ibm/wlp/output
-      volumes:
-      - name: wlp-output
-        emptyDir: {}
-      - name: tmp
-        emptyDir: {}
----
-EOF"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews"        # reviews Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=reviews"        # reviews ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v1" # reviews-v1 Deployment
 pe ""
 clear
 
 p "Product Page Deployment"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: v1
-kind: Service
-metadata:
-  name: productpage
-  labels:
-    app: productpage
-    service: productpage
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: productpage
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-productpage
-  labels:
-    account: productpage
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: productpage-v1
-  labels:
-    app: productpage
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: productpage
-      version: v1
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-        app: productpage
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-productpage
-      containers:
-      - name: productpage
-        image: maistra/examples-bookinfo-productpage-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-      volumes:
-      - name: tmp
-        emptyDir: {}
----
-EOF"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=productpage"        # productpage Service
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=productpage"        # productpage ServiceAccount
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=productpage,version=v1" # productpage-v1 Deployment
+p ""
+clear
+
+p "Create bookinfo Gateway deployment"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_GATEWAY_YAML"
 pe ""
 clear
 
 p "Add Destination Rules"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: productpage
-spec:
-  host: productpage
-  subsets:
-  - name: v1
-    labels:
-      version: v1
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: reviews
-spec:
-  host: reviews
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v3
-    labels:
-      version: v3
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: ratings
-spec:
-  host: ratings
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v2-mysql
-    labels:
-      version: v2-mysql
-  - name: v2-mysql-vm
-    labels:
-      version: v2-mysql-vm
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: details
-spec:
-  host: details
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
----
-EOF"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES_YAML"
 pe ""
 clear
 
@@ -478,6 +205,12 @@ p "List tool routes"
 pe "oc get route -n $CONTROL_PLANE_NAMESPACE"
 pe ""
 clear
+
+p "Verify Deployment"
+pe "oc get virtualservices"   #-- there should be virtual services: bookinfo
+pe "oc get destinationrules"  #-- there should be destination rules: details, ratings, and revies
+pe "oc get gateway"           #-- there should be a gateway: bookinfo-gateway
+pe "oc get pods"              #-- there should be bookinfo pods
 
 # show a prompt so as not to reveal our true nature after
 # the demo has concluded
