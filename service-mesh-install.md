@@ -206,37 +206,245 @@ EOF
 ```
 
 ## Application Deployment
-1. Export bookinfo application YAML file location:
+1. Create bookinfo `reviews v1` deployment using the following command:
 ```bash
-export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: reviews
+  labels:
+    app: reviews
+    service: reviews
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: reviews
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookinfo-reviews
+  labels:
+    account: reviews
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-v1
+  labels:
+    app: reviews
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reviews
+      version: v1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: reviews
+        version: v1
+    spec:
+      serviceAccountName: bookinfo-reviews
+      containers:
+      - name: reviews
+        image: maistra/examples-bookinfo-reviews-v1:2.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: LOG_DIR
+          value: "/tmp/logs"
+        ports:
+        - containerPort: 9080
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: wlp-output
+          mountPath: /opt/ibm/wlp/output
+      volumes:
+      - name: wlp-output
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+---
 ```
 
-2. Create bookinfo `Rreviews` deployment using the following command:
+2. Create bookinfo `ratings v1` deployment using the following command:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews # reviews Service
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=reviews # reviews ServiceAccount
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v1 # reviews-v1 Deployment
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratings
+  labels:
+    app: ratings
+    service: ratings
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: ratings
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookinfo-ratings
+  labels:
+    account: ratings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratings-v1
+  labels:
+    app: ratings
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ratings
+      version: v1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: ratings
+        version: v1
+    spec:
+      serviceAccountName: bookinfo-ratings
+      containers:
+      - name: ratings
+        image: maistra/examples-bookinfo-ratings-v1:2.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+EOF
 ```
 
-3. Create bookinfo `Ratings` deployment using the following command:
+3. Create bookinfo `details v1` deployment using the following command:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=ratings # ratings Service
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=ratings # ratings ServiceAccount
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1 # ratings-v1 Deployment
-```
-
-4. Create bookinfo `Details` deployment using the following command:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=details # details Service
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=details # details ServiceAccount
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=details,version=v1 # details-v1 Deployment
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: details
+  labels:
+    app: details
+    service: details
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: details
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookinfo-details
+  labels:
+    account: details
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: details-v1
+  labels:
+    app: details
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: details
+      version: v1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: details
+        version: v1
+    spec:
+      serviceAccountName: bookinfo-details
+      containers:
+      - name: details
+        image: maistra/examples-bookinfo-details-v1:2.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+---
+EOF
 ```
 
 5. Create bookinfo `Product Page` deployment using the following command:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=productpage # productpage Service
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=productpage # productpage ServiceAccount
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=productpage,version=v1 # productpage-v1 Deployment
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: productpage
+  labels:
+    app: productpage
+    service: productpage
+spec:
+  ports:
+  - port: 9080
+    name: http
+  selector:
+    app: productpage
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookinfo-productpage
+  labels:
+    account: productpage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productpage-v1
+  labels:
+    app: productpage
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: productpage
+      version: v1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: productpage
+        version: v1
+    spec:
+      serviceAccountName: bookinfo-productpage
+      containers:
+      - name: productpage
+        image: maistra/examples-bookinfo-productpage-v1:2.0.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9080
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+---
+EOF
 ```
 
 6. Create bookinfo `Gateway` deployment using the following command:
@@ -292,7 +500,7 @@ export GATEWAY_URL=$(oc -n $CONTROL_PLANE_NAMESPACE get route istio-ingressgatew
 echo $GATEWAY_URL
 ```
 
-8. Add `Destination Rules` using the following command:
+8. Add `Destination Rules` for v1 services using the following command:
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
 apiVersion: networking.istio.io/v1alpha3
@@ -316,12 +524,6 @@ spec:
   - name: v1
     labels:
       version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v3
-    labels:
-      version: v3
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -333,15 +535,6 @@ spec:
   - name: v1
     labels:
       version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v2-mysql
-    labels:
-      version: v2-mysql
-  - name: v2-mysql-vm
-    labels:
-      version: v2-mysql-vm
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -353,9 +546,6 @@ spec:
   - name: v1
     labels:
       version: v1
-  - name: v2
-    labels:
-      version: v2
 ---
 EOF
 ```
