@@ -191,11 +191,6 @@ pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_GATEWAY_YAML"
 pe ""
 clear
 
-p "Add Destination Rules"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES_YAML"
-pe ""
-clear
-
 p "List Pods"
 pe "oc get pods -n $BOOKINFO_NAMESPACE"
 pe ""

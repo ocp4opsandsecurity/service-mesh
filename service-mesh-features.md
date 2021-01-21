@@ -33,6 +33,16 @@ oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
 ```
 
+#### Virtual Services and Destination Rules
+Think of virtual services as how you route your traffic to a given destination, and then you use destination rules to 
+configure what happens to traffic for that destination. Destination rules are applied after virtual service routing 
+rules are evaluated, so they apply to the traffic’s “real” destination.
+
+1. Apply `Destination Rules` using the following command:
+```bash
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES_YAML
+```
+
 #### Virtual Service
 A virtual service lets you configure how requests are routed to a service within a service mesh, building on the basic
 connectivity and discovery provided by the service mesh platform. Each virtual service consists of a set of routing
@@ -97,7 +107,7 @@ oc apply -f- <<EOF
 EOF
 ```
 
-#### A/B testing
+#### A/B Testing
 A/B testing is a method of comparing two versions.
 
 1. Route 100% of review traffic to version `v2` using the following command:
@@ -118,10 +128,19 @@ oc apply -f- <<EOF
 EOF
 ```
 
-##### Canary Rollouts
-Canary release is a risk reduction technique used to deploy new software using a phased approach.
+##### Load Balancing
+Round-robin is the default load balancing policy, where each service instance in the instance pool gets a request in turn.
 
-1. Route the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
+1. Supported load balancing policy models:
+- **Random:** Requests are forwarded at random to instances in the pool.
+- **Weighted:** Requests are forwarded in the pool according to a specific percentage.
+- **Least requests:** Requests are forwarded to the instances with the least number of requests.
+
+
+2. Example 
+A canary rollout, a phased software release, can be implemented using a **weighted** load balancing policy.
+   
+2. Route the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
 ```bash
 oc apply -f- <<EOF
   apiVersion: networking.istio.io/v1beta1
@@ -143,6 +162,9 @@ oc apply -f- <<EOF
         weight: 15
 EOF
 ```
+
+
+
 
 ## Walk-Through
 Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference application. 

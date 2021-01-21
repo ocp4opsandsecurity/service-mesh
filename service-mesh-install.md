@@ -168,8 +168,10 @@ oc get smcp -n $CONTROL_PLANE_NAMESPACE
 
 ## Service Members
 
-### Service Member Roll Creation
-1. Create projects for each `Service Mesh Member` using the following commands:
+### Service Member Roll
+The ServiceMeshMemberRoll lists the projects belonging to the control plane.
+
+1. Create the service mesh member `project` using the following commands:
 ```bash
 oc new-project $BOOKINFO_NAMESPACE
 ```
@@ -189,7 +191,9 @@ spec:
 EOF
 ```
 
-#### Service Member Creation
+### Create Service Mesh Member User
+Create a user to access resources that does not have privileges to add members to the ServiceMeshMemberRoll directly.
+
 1. Create a service mesh `user` for each project using the following commands:
 ```bash
 oc create user $BOOKINFO_MESH_USER
@@ -243,24 +247,23 @@ oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=ratings        
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1 # ratings-v1 Deployment
 ```
 
-6. Create bookinfo `Gateway` deployment using the following command:
+### Create a Gateway
+Use a gateway to manage inbound and outbound traffic for your mesh.
+
+Create `gateway` deployment using the following command:
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKMARK_GATEWAY_YAML
 ```
 
-7. Add `Destination Rules` using the following command:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES_YAML
-```
-
-8. List Pods using the following command:
+### Verify the deployment
+List Pods using the following command:
 ```bash
 oc get pods -n $BOOKINFO_NAMESPACE
 ```   
 
 ## Tool Routes 
 
-1. List the routes for each tools using the following command:
+8. List the routes for each tools using the following command:
 ```bash
 oc get route -n $CONTROL_PLANE_NAMESPACE 
 ```
