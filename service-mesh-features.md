@@ -1,5 +1,5 @@
 # service-mesh-features
-How to that explores many of the powerful Service Mesh features.
+How to that explores many of the powerful Service Mesh features covered in the Istio BookInfo reference applicaiton.
 
 - [Assumptions](#assumptions)
 - [Traffic Management](#traffic-management)
@@ -7,31 +7,14 @@ How to that explores many of the powerful Service Mesh features.
 - [Walk-Through](#walk-through)
 - [Quick-Start](#quick-start)
 
-## Assumptions
-1. Red Hat OpenShift Service Mesh is installed using the proceedure described in [Service Mesh Install](service-mesh-install.md). See the [Service Mesh Install Quick Start](#service-mesh-install-quick-start.sh) if you want to quickly install a compliant instance of our Service Mesh how-to baseline deployment.
-
-2. The bookinfo application topology should consist of the following resources.
-```bash
-oc get virtualservices   #-- there should be virtual services: bookinfo
-oc get destinationrules  #-- there should be destination rules: details, ratings, and revies 
-oc get gateway           #-- there should be a gateway: bookinfo-gateway
-oc get pods              #-- there should be Bookinfo pods 
-```
-3. Export Environment Variables
-```bash
-export CONTROL_PLANE_NAMESPACE=istio-system
-export BOOKINFO_NAMESPACE=bookinfo
-export BOOKINFO_MESH_USER=bookinfo-mesh-user
-export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
-export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
-export GATEWAY_CONFIG=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
-```
+## Dependencies
+1. Red Hat OpenShift Service Mesh is installed using the [Quick-Start](#quick-start)
 
 ## Traffic Management
 Traffic routing lets you control the flow of traffic between services.
 
 ### Request Routing
-Request routing by defaults routes traffic to all available service versions in a round robin fashion. To demonstrate, deploy
+Request routing by defaults routes traffic to all available service versions in a round-robin fashion. To demonstrate, deploy
 both the `reiews v2` and `reviews v3` along side `review v1` of the reviews service. Observe the traffic dynamically 
 switch between service versions by refreshing the product page in your browser.
 

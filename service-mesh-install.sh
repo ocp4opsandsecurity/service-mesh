@@ -211,6 +211,7 @@ pe "oc get virtualservices"   #-- there should be virtual services: bookinfo
 pe "oc get destinationrules"  #-- there should be destination rules: details, ratings, and revies
 pe "oc get gateway"           #-- there should be a gateway: bookinfo-gateway
 pe "oc get pods"              #-- there should be bookinfo pods
+p ""
 
 # show a prompt so as not to reveal our true nature after
 # the demo has concluded
