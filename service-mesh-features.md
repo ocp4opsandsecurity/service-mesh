@@ -35,7 +35,7 @@ Request routing by defaults routes traffic to all available service versions in 
 both the `reiews v2` and `reviews v3` along side `review v1` of the reviews service. Observe the traffic dynamically 
 switch between service versions by refreshing the product page in your browser.
 
-1. Display the curret routes using the following command:
+1. Display the current routes using the following command:
 ```bash
 oc describe virtualservices
 ```

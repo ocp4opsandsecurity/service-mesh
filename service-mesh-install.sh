@@ -424,6 +424,12 @@ spec:
   - name: v1
     labels:
       version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -435,6 +441,15 @@ spec:
   - name: v1
     labels:
       version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v2-mysql
+    labels:
+      version: v2-mysql
+  - name: v2-mysql-vm
+    labels:
+      version: v2-mysql-vm
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
@@ -446,6 +461,9 @@ spec:
   - name: v1
     labels:
       version: v1
+  - name: v2
+    labels:
+      version: v2
 ---
 EOF"
 pe ""
