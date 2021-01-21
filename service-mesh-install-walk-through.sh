@@ -193,8 +193,7 @@ pe ""
 clear
 
 p "Create application deployment"
-pe "export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews && \
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews && \
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=reviews  && \
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v1 && \
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=ratings && \
@@ -218,8 +217,7 @@ pe ""
 clear
 
 p "Add Destination Rules"
-pe "export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES"
+pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES"
 pe ""
 clear
 
