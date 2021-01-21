@@ -10,6 +10,11 @@ How to that explores many of the powerful Service Mesh features covered in the I
 ## Dependencies
 1. Red Hat OpenShift Service Mesh is installed using the [Quick-Start](#quick-start)
 
+2. Environment Variables
+```bash
+export BOOKINFO_VIRTUAL_SERVICE_YAML=virtual-service.yaml
+```
+
 ## Traffic Management
 Traffic routing lets you control the flow of traffic between services.
 
@@ -32,8 +37,14 @@ oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
 ```
-.
-4. To route requests to a single destination subset, `v1`, only use the following command:
+
+#### Virtual Service
+A virtual service lets you configure how requests are routed to a service within a service mesh, building on the basic
+connectivity and discovery provided by the service mesh platform. Each virtual service consists of a set of routing
+rules that are evaluated in order, letting the service mesh match each request to the virtual service to a specific real 
+destination within the mesh.
+
+1. Route all traffic to subset, `v1`, only use the following command:
 ```bash
 oc apply -f- <<EOF
   apiVersion: networking.istio.io/v1beta1
@@ -87,6 +98,54 @@ oc apply -f- <<EOF
       - destination:
           host: reviews
           subset: v1
+---
+EOF
+```
+
+#### A/B testing
+A/B testing is a method of comparing two versions.
+
+1. Route 100% of review traffic to version `v2` using the following command:
+```bash
+oc apply -f- <<EOF
+  apiVersion: networking.istio.io/v1beta1
+  kind: VirtualService
+  metadata:
+    name: reviews
+  spec:
+    hosts:
+    - reviews
+    http:
+    - route:
+      - destination:
+          host: reviews
+          subset: v2
+EOF
+```
+
+##### Canary Rollouts
+Canary release is a risk reduction technique used to deploy new software using a phased approach.
+
+1. Route the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
+```bash
+oc apply -f- <<EOF
+  apiVersion: networking.istio.io/v1beta1
+  kind: VirtualService
+  metadata:
+    name: reviews
+  spec:
+    hosts:
+    - reviews
+    http:
+    - route:
+      - destination:
+          host: reviews
+          subset: v2
+        weight: 85
+      - destination:
+          host: reviews
+          subset: v3
+        weight: 15
 EOF
 ```
 
