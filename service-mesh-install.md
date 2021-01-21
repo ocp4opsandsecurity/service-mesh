@@ -216,6 +216,7 @@ EOF
 ## Application Deployment
 1. Create bookinfo `reviews v1` deployment using the following command:
 ```bash
+oc apply -f- <<EOF
 apiVersion: v1
 kind: Service
 metadata:
@@ -279,6 +280,7 @@ spec:
       - name: tmp
         emptyDir: {}
 ---
+EOF
 ```
 
 2. Create bookinfo `ratings v1` deployment using the following command:
