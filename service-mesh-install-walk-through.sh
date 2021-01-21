@@ -29,6 +29,14 @@ DEMO_CMD_COLOR=$BLACK
 # hide the evidence
 clear
 
+export CONTROL_PLANE_NAMESPACE=istio-system
+export BOOKINFO_NAMESPACE=bookinfo
+export BOOKINFO_MESH_USER=bookinfo-mesh-user
+export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
+export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
+export GATEWAY_CONFIG=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
+
+
 pe "Installing the Red Hat Elasticsearch Operator"
 pe "oc apply -n openshift-operators -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
@@ -186,18 +194,18 @@ clear
 
 p "Create application deployment"
 pe "export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews # reviews Service && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=reviews # reviews ServiceAccount && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2 # reviews-v3 Deployment && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=ratings # ratings Service && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=ratings # ratings ServiceAccount && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1 # ratings-v1 Deployment && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=details # details Service && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=details # details ServiceAccount && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=details,version=v1 # details-v1 Deployment && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=productpage # productpage Service && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=productpage # productpage ServiceAccount && \
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=productpage,version=v1 # productpage-v1 Deployment"
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=reviews && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=reviews  && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v1 && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=ratings && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=ratings && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1 && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=details && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=details  && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=details,version=v1 && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l service=productpage && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l account=productpage && \
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=productpage,version=v1"
 pe ""
 clear
 
