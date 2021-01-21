@@ -129,8 +129,9 @@ curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/serv
 sh ./service-mesh-features-walk-through.sh
 ```
 
-## Install Quick-Start
-Use this `quick-start` to install, deploy, and configure this how-to's flavor of a Red Hat OpenShift Service Mesh deployment.
+## Quick-Start
+Use this `quick-start` to install, deploy, and configure this how-to for Red Hat OpenShift Service Mesh so that your can
+explore the tools and get right to it.
 
 **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
 
@@ -143,12 +144,18 @@ curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo
 2. Download the quick-start script using the following command:
 ```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-quick-start.sh \
-     --output service-mesh-features-quick-start.sh
+     --output service-mesh-quick-start.sh
 ```
 
-3. Execute the quick-start using the following command:
+3. Download the install script using the following command:
 ```bash
-sh ./service-mesh-features-quick-start.sh
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-install.sh \
+     --output service-mesh-install.sh
+```
+
+4. Execute the quick-start using the following command:
+```bash
+sh ./service-mesh-quick-start.sh
 ```
 
 ## References

@@ -13,6 +13,7 @@ Use the [Walk-Through](#walk-through) if you are in a hurry.
 - [Application Deployment](#applicaiton-deployment)
 - [Tools](#tools)
 - [Walk-Through](#walk-through)
+- [Quick-Start](#quick-start)
 
 ## Operator Installation
 To install the operators, you must log in to the OpenShift Container Platform as a user with the cluster-admin role.
@@ -504,13 +505,7 @@ spec:
 EOF
 ```
 
-7. Export Gateway URL using the following command:
-```bash
-export GATEWAY_URL=$(oc -n $CONTROL_PLANE_NAMESPACE get route istio-ingressgateway -o jsonpath='{.spec.host}')
-echo $GATEWAY_URL
-```
-
-8. Add `Destination Rules` for v1 services using the following command:
+7. Add `Destination Rules` for v1 services using the following command:
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
 apiVersion: networking.istio.io/v1alpha3
@@ -560,15 +555,10 @@ spec:
 EOF
 ```
 
-9. List Pods using the following command:
+8. List Pods using the following command:
 ```bash
 oc get pods -n $BOOKINFO_NAMESPACE
 ```   
-
-10. Verify Deployment using the following command:
-```bash
-curl -o /dev/null -s -w "%{http_code}\n" http://$GATEWAY_URL/productpage
-```
 
 ## Tool Routes 
 
@@ -595,6 +585,35 @@ curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/m
 3. Execute the walk through using the following command:
 ```bash
 sh ./service-mesh-install-walk-through.sh
+```
+
+## Quick-Start
+Use this `quick-start` to install, deploy, and configure this how-to for Red Hat OpenShift Service Mesh so that your can
+explore the tools and get right to it.
+
+**Note** `Curl` and `Pipe Viewer` are to be installed on your system.
+
+1. Download demo-magic script using the following commands:
+```bash
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
+     --output demo-magic.sh
+```
+
+2. Download the quick-start script using the following command:
+```bash
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-quick-start.sh \
+     --output service-mesh-quick-start.sh
+```
+
+3. Download the install script using the following command:
+```bash
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-install.sh \
+     --output service-mesh-install.sh
+```
+
+4. Execute the quick-start using the following command:
+```bash
+sh ./service-mesh-quick-start.sh
 ```
 
 ## References
