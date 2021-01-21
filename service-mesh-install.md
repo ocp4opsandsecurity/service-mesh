@@ -4,12 +4,14 @@ install the Red Hat OpenShift Service Mesh Operator, you must first install the 
 Operators in the service mesh control plane namespace. For this exercise we will also be deploying the upstream bookinfo 
 reference application to allow us to test drive our deployment. 
 
-Use the [Walk-Through](#walk-through) if you are in a hurry.
+> Use the [Walk-Through](#walk-through) if you want to automate the entering of the commands.
+
+> Use the [Quick-Start](#quick-start) if you just want to stand everything up automatically.
 
 ## Table Of Contents
 - [Operator Installation](#operator-installation)
 - [Control Plane Deployment](#control-plane-deployment)
-- [Service Member Creation](#service-member-creation)
+- [Service Member Deployment](#service-member-deployment)
 - [Application Deployment](#applicaiton-deployment)
 - [Tools](#tools)
 - [Walk-Through](#walk-through)
@@ -166,7 +168,7 @@ EOF
 oc get smcp -n $CONTROL_PLANE_NAMESPACE
 ```
 
-## Service Members
+## Service Member Deployment
 
 ### Service Member Roll
 The ServiceMeshMemberRoll lists the projects belonging to the control plane.
@@ -250,16 +252,26 @@ oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=ratings,version=v1 
 ### Create a Gateway
 Use a gateway to manage inbound and outbound traffic for your mesh.
 
-Create `gateway` deployment using the following command:
+Associate this application with the `gateway` using the following command:
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKMARK_GATEWAY_YAML
 ```
 
 ### Verify the deployment
-List Pods using the following command:
+1. List `Services` using the following command:
+```bash
+oc get services -n $BOOKINFO_NAMESPACE
+```
+
+2. List Pods using the following command:
 ```bash
 oc get pods -n $BOOKINFO_NAMESPACE
 ```   
+
+3. List Gateway URL
+```bash
+oc -n $CONTROL_PLANE_NAMESPACE get route istio-ingressgateway -o jsonpath='{.spec.host}'
+```
 
 ## Tool Routes 
 

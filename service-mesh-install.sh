@@ -196,6 +196,11 @@ pe "oc get pods -n $BOOKINFO_NAMESPACE"
 pe ""
 clear
 
+p "List Gateway URL"
+pe "oc -n $CONTROL_PLANE_NAMESPACE get route istio-ingressgateway -o jsonpath='{.spec.host}'"
+pe ""
+clear
+
 p "List tool routes"
 pe "oc get route -n $CONTROL_PLANE_NAMESPACE"
 pe ""

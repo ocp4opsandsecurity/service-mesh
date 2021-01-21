@@ -1,5 +1,9 @@
 # service-mesh-features
-How to that explores many of the powerful Service Mesh features covered in the Istio BookInfo reference applicaiton.
+How to that explores many of the powerful Service Mesh features covered in the Istio BookInfo reference application.
+
+> Use the [Walk-Through](#walk-through) if you want to automate the entering of the commands.
+
+> Use the [Quick-Start](#quick-start) if you just want to stand everything up automatically.
 
 - [Assumptions](#assumptions)
 - [Traffic Management](#traffic-management)
@@ -7,8 +11,9 @@ How to that explores many of the powerful Service Mesh features covered in the I
 - [Walk-Through](#walk-through)
 - [Quick-Start](#quick-start)
 
-## Dependencies
-1. Red Hat OpenShift Service Mesh is installed using the [Quick-Start](#quick-start)
+## Assumptions
+- Red Hat OpenShift Service Mesh is installed and configured using the [Quick-Start](#quick-start) or the procedure as 
+described in the [Service Mesh Install](service-mesh-install.md) how-to.
 
 ## Traffic Management
 Traffic routing lets you control the flow of traffic between services.
@@ -20,7 +25,7 @@ switch between service versions by refreshing the product page in your browser.
 
 1. Display the current routes using the following command:
 ```bash
-oc describe virtualservices
+oc describe virtualservices | less
 ```
 
 2. Deploy `reviews v2` service and refresh the product page until you see BLACK star reviews:
@@ -128,7 +133,7 @@ oc apply -f- <<EOF
 EOF
 ```
 
-##### Load Balancing
+#### Load Balancing
 Round-robin is the default load balancing policy, where each service instance in the instance pool gets a request in turn.
 
 1. Supported load balancing policy models:
