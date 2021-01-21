@@ -10,11 +10,6 @@ How to that explores many of the powerful Service Mesh features covered in the I
 ## Dependencies
 1. Red Hat OpenShift Service Mesh is installed using the [Quick-Start](#quick-start)
 
-2. Environment Variables
-```bash
-export BOOKINFO_VIRTUAL_SERVICE_YAML=virtual-service.yaml
-```
-
 ## Traffic Management
 Traffic routing lets you control the flow of traffic between services.
 
