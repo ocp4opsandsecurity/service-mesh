@@ -136,16 +136,13 @@ EOF
 #### Load Balancing
 Round-robin is the default load balancing policy, where each service instance in the instance pool gets a request in turn.
 
-1. Supported load balancing policy models:
+Supported load balancing policy models:
 - **Random:** Requests are forwarded at random to instances in the pool.
 - **Weighted:** Requests are forwarded in the pool according to a specific percentage.
 - **Least requests:** Requests are forwarded to the instances with the least number of requests.
 
 
-2. Example 
-A canary rollout, a phased software release, can be implemented using a **weighted** load balancing policy.
-   
-2. Route the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
+1. **Weighted** example routes the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
 ```bash
 oc apply -f- <<EOF
   apiVersion: networking.istio.io/v1beta1
@@ -168,11 +165,33 @@ oc apply -f- <<EOF
 EOF
 ```
 
-
-
-
+2. **Random** example distributes the review traffic to version `v1`, `v2`, `v3` using the following command:
+```bash
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+EOF
+```
 ## Walk-Through
-Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference application. 
+Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference 
+application. 
 
 > **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
 
