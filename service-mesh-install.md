@@ -30,6 +30,16 @@ have with randomly generated suffixes.
 source <(oc completion bash)
 ``` 
 
+### Export Environment Variables
+```bash
+export CONTROL_PLANE_NAMESPACE=istio-system
+export BOOKINFO_NAMESPACE=bookinfo
+export BOOKINFO_MESH_USER=bookinfo-mesh-user
+export BOOKINFO_APP_YAML=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
+export BOOKINFO_DEST_RULES=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
+export GATEWAY_CONFIG=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
+```
+
 ### Installing the Red Hat Elasticsearch Operator
 Elasticsearch, based on the open source Elasticsearch project.
 
@@ -160,7 +170,6 @@ oc get smcp -n $CONTROL_PLANE_NAMESPACE
 ### Service Member Roll Creation
 1. Create projects for each `Service Mesh Member` using the following commands:
 ```bash
-export BOOKINFO_NAMESPACE=bookinfo
 oc new-project $BOOKINFO_NAMESPACE
 ```
 
@@ -182,7 +191,6 @@ EOF
 #### Service Member Creation
 1. Create a service mesh `user` for each project using the following commands:
 ```bash
-export BOOKINFO_MESH_USER=bookinfo-mesh-user
 oc create user $BOOKINFO_MESH_USER
 ```
 
