@@ -1,15 +1,14 @@
 # service-mesh-features
 How to that explores many of the powerful Service Mesh features covered in the Istio BookInfo reference application.
 
-> Use the [Walk-Through](#walk-through) if you want to automate the entering of the commands.
-
-> Use the [Quick-Start](#quick-start) if you just want to stand everything up automatically.
+> Use the [Quick-Start](#quick-start) if you just want to configure environment variables and the service mesh deployment.
 
 - [Assumptions](#assumptions)
 - [Traffic Management](#traffic-management)
   - [Request Routing](#request-routing)
 - [Walk-Through](#walk-through)
 - [Quick-Start](#quick-start)
+- [References](#references)
 
 ## Assumptions
 - Red Hat OpenShift Service Mesh is installed and configured using the [Quick-Start](#quick-start) or the procedure as 
@@ -410,7 +409,7 @@ The RED star ratings appear next to each review.
 
 5. Log in as another user (pick any name you wish). Refresh the browser. Now the stars are gone. This is because 
 traffic is routed to reviews:v1 for all users except Bill and Fred.
-
+   
 ## Walk-Through
 Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference 
 application. 
@@ -464,13 +463,8 @@ sh ./service-mesh-quick-start.sh
 ```
 
 ## References
-
-### Red Hat OpenShift
+- [Demo Magic](https://github.com/paxtonhare/demo-magic)
+- [Istio Release 1.6.14](https://istio.io/latest/news/releases/1.6.x/announcing-1.6.14/)
 - [Red Hat OpenShift Command Line Tools](https://docs.openshift.com/container-platform/4.6/cli_reference/openshift_cli/getting-started-cli.html#cli-about-cli_cli-developer-commands)
 - [Red Hat Service Mesh](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.6/html-single/service_mesh/index)
-
-### Upstream Projects
-- [Istio Release 1.6.14](https://istio.io/latest/news/releases/1.6.x/announcing-1.6.14/) 
-
-## Trouble Shooting
 - [Unable To Delete Namespace](https://access.redhat.com/solutions/4165791)

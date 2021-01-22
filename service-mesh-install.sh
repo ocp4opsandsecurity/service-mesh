@@ -1,3 +1,4 @@
+pe "export OPERATORS_NAMESPACE=openshift-operators"
 pe "export CONTROL_PLANE_NAMESPACE=istio-system"
 pe "export BOOKINFO_NAMESPACE=bookinfo"
 pe "export BOOKINFO_MESH_USER=bookinfo-mesh-user"
@@ -7,12 +8,11 @@ pe "export BOOKINFO_GATEWAY_YAML=https://raw.githubusercontent.com/Maistra/istio
 
 
 p "Installing the Red Hat Elasticsearch Operator"
-pe "oc apply -n openshift-operators -f- <<EOF
+pe "oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: elasticsearch-subscription
-  namespace: openshift-operators
 spec:
   channel: '4.6'
   installPlanApproval: Automatic
@@ -24,12 +24,11 @@ pe ""
 clear
 
 p "Installing the Red Hat Jaeger Operator"
-pe "oc apply -n openshift-operators -f- <<EOF
+pe "oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: jaeger-product-subscription
-  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -42,12 +41,11 @@ pe ""
 clear
 
 p "Installing the Red Hat Kiali Operator"
-pe "oc apply -n openshift-operators -f- <<EOF
+pe "oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: kiali-ossm
-  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -60,12 +58,11 @@ pe ""
 clear
 
 p "Installing the Red Hat Service Mesh Operator"
-pe "oc apply -n openshift-operators -f- <<EOF
+pe "oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: servicemeshoperator
-  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -208,8 +205,11 @@ clear
 
 p "Verify Deployment"
 pe "oc get virtualservices"   #-- there should be virtual services: bookinfo
+pe ""
 pe "oc get destinationrules"  #-- there should be destination rules: details, ratings, and revies
+pe ""
 pe "oc get gateway"           #-- there should be a gateway: bookinfo-gateway
+""
 pe "oc get pods"              #-- there should be bookinfo pods
 p ""
 
