@@ -16,6 +16,8 @@ reference application to allow us to test drive our deployment.
 - [Tools](#tools)
 - [Walk-Through](#walk-through)
 - [Quick-Start](#quick-start)
+- [Cleanup](#cleanup)
+- [References](#references)
 
 ## Operator Installation
 To install the operators, you must log in to the OpenShift Container Platform as a user with the cluster-admin role.
@@ -35,6 +37,7 @@ source <(oc completion bash)
 
 ### Export Environment Variables
 ```bash
+export OPERATORS_NAMESPACE=openshift-operators
 export CONTROL_PLANE_NAMESPACE=istio-system
 export BOOKINFO_NAMESPACE=bookinfo
 export BOOKINFO_MESH_USER=bookinfo-mesh-user
@@ -48,12 +51,11 @@ Elasticsearch, based on the open source Elasticsearch project.
 
 Create a Subscription object using the following command:
 ```bash
-oc apply -n openshift-operators -f- <<EOF
+oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: elasticsearch-subscription
-  namespace: openshift-operators
 spec:
   channel: '4.6'
   installPlanApproval: Automatic
@@ -68,12 +70,11 @@ Jaeger, based on the open source Jaeger project, lets you perform tracing to mon
  
 Create a Subscription object using the following command:
 ```bash
-oc apply -n openshift-operators -f- <<EOF
+oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: jaeger-product-subscription
-  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -90,12 +91,11 @@ view configurations, monitor traffic, and view and analyze traces in a single co
 
 Create a Subscription object using the following command:
 ```bash
-oc apply -n openshift-operators -f- <<EOF
+oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: kiali-ossm
-  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -108,12 +108,11 @@ EOF
 
 ### Install the Red Hat Service Mesh Operator
 ```bash
-oc apply -f- <<EOF
+oc apply -n $OPERATORS_NAMESPACE -f- <<EOF
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
   name: servicemeshoperator
-  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -138,12 +137,11 @@ oc new-project $CONTROL_PLANE_NAMESPACE
 
 3. Create a ServiceMeshControlPlane object using the following command:
 ```bash
-oc apply -f- <<EOF
+oc apply -n ${CONTROL_PLANE_NAMESPACE} -f- <<EOF
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
   name: basic
-  namespace: ${CONTROL_PLANE_NAMESPACE}
 spec:
   version: v2.0
   tracing:
@@ -327,6 +325,20 @@ curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/serv
 4. Execute the quick-start using the following command:
 ```bash
 sh ./service-mesh-quick-start.sh
+```
+
+## Cleanup
+```bash
+oc delete project $BOOKINFO_NAMESPACE
+oc delete user $BOOKINFO_MESH_USER
+oc delete rolebindings.rbac.authorization.k8s.io -n $CONTROL_PLANE_NAMESPACE
+oc delete servicemeshmemberrolls.maistra.io -n $CONTROL_PLANE_NAMESPACE
+oc delete servicemeshcontrolplanes.maistra.io -n $CONTROL_PLANE_NAMESPACE
+oc delete project $CONTROL_PLANE_NAMESPACE
+oc delete subscription servicemeshoperator -n $OPERATORS_NAMESPACE
+oc delete subscription kiali-ossm -n $OPERATORS_NAMESPACE
+oc delete subscription jaeger-product-subscription -n $OPERATORS_NAMESPACE
+oc delete subscription elasticsearch-subscription -n $OPERATORS_NAMESPACE
 ```
 
 ## References

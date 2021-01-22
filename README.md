@@ -6,7 +6,7 @@
 | [Service Mesh Install](service-mesh-install.md)| How to install and run the Red Hat OpenShift Service Mesh using `oc commands`|
 | [Service Mesh Features](service-mesh-features.md)| How to that explores Red Hat OpenShift Service Mesh features |
 
-# Those Paved The Way
+# Pathfinders
 | Title| Description | 
 | :--- | :---        |
 |[Istio](https://istio.io/)| The worlds leading opensource service mesh implementation |
