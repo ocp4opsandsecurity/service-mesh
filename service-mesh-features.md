@@ -38,17 +38,164 @@ rules are evaluated, so they apply to the traffic’s “real” destination.
 
 1. Apply `Destination Rules` using the following command:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES_YAML
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: ratings
+spec:
+  host: ratings
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v2-mysql
+    labels:
+      version: v2-mysql
+  - name: v2-mysql-vm
+    labels:
+      version: v2-mysql-vm
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: details
+spec:
+  host: details
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+---
+EOF
 ```
 
 2. Deploy `reviews v2` service and refresh the product page until you see BLACK star reviews:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-v2
+  labels:
+    app: reviews
+    version: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reviews
+      version: v2
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: reviews
+        version: v2
+    spec:
+      serviceAccountName: bookinfo-reviews
+      containers:
+      - name: reviews
+        image: maistra/examples-bookinfo-reviews-v2:2.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: LOG_DIR
+          value: "/tmp/logs"
+        ports:
+        - containerPort: 9080
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: wlp-output
+          mountPath: /opt/ibm/wlp/output
+      volumes:
+      - name: wlp-output
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+EOF
 ```
 
 3. Deploy `reviews v3` service and refresh the product page until you see RED star reviews:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews-v3
+  labels:
+    app: reviews
+    version: v3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: reviews
+      version: v3
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: reviews
+        version: v3
+    spec:
+      serviceAccountName: bookinfo-reviews
+      containers:
+      - name: reviews
+        image: maistra/examples-bookinfo-reviews-v3:2.0.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: LOG_DIR
+          value: "/tmp/logs"
+        ports:
+        - containerPort: 9080
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: wlp-output
+          mountPath: /opt/ibm/wlp/output
+      volumes:
+      - name: wlp-output
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {}
+EOF
 ```
 
 #### Virtual Service
@@ -147,24 +294,24 @@ Supported load balancing policy models:
 
 1. **Weighted** example routes the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
 ```bash
-oc apply -f- <<EOF
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: reviews
-  spec:
-    hosts:
-    - reviews
-    http:
-    - route:
-      - destination:
-          host: reviews
-          subset: v2
-        weight: 85
-      - destination:
-          host: reviews
-          subset: v3
-        weight: 15
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v2
+      weight: 85
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 15
 EOF
 ```
 
@@ -192,6 +339,77 @@ spec:
       version: v3
 EOF
 ```
+
+#### Header Based Routing
+We can change the route configuration so that all traffic from a specific user is routed to a specific service 
+version. In this case, all traffic from a user named `Bill` will be routed to the service reviews:v2 and from user named
+`Fred` will be routed to the service reviews:v1. This example is enabled by the fact that the productpage service adds 
+a custom end-user header to all outbound HTTP requests to the reviews service.
+
+1. Reset the reviews `DestinationRule` to all routes.
+```bash
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: reviews
+spec:
+  host: reviews
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  - name: v2
+    labels:
+      version: v2
+  - name: v3
+    labels:
+      version: v3
+EOF
+```
+
+2. Deploy the reviews `VirtualService` that matches on `Bill` or `Fred` using the following command:
+```bash
+oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: Bill
+    route:
+    - destination:
+        host: reviews
+        subset: v2
+  - match:
+    - headers:
+        end-user:
+          exact: Fred
+    route:
+    - destination:
+        host: reviews
+        subset: v3
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+EOF
+```
+
+3. On the /productpage of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
+The BLACK star ratings appear next to each review.
+
+4. On the /productpage of the Bookinfo application, log in as user `Fred`. Refresh the browser. What do you see?
+The RED star ratings appear next to each review.
+
+5. Log in as another user (pick any name you wish). Refresh the browser. Now the stars are gone. This is because 
+traffic is routed to reviews:v1 for all users except Bill and Fred.
 
 ## Walk-Through
 Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference 

@@ -127,24 +127,24 @@ pe ""
 clear
 
 p "Load Balancing: weighted"
-pe "oc apply -f- <<EOF
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: reviews
-  spec:
-    hosts:
-    - reviews
-    http:
-    - route:
-      - destination:
-          host: reviews
-          subset: v2
-        weight: 85
-      - destination:
-          host: reviews
-          subset: v3
-        weight: 15
+pe "oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v2
+      weight: 85
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 15
 EOF"
 pe ""
 clear
