@@ -25,17 +25,10 @@ switch between service versions by refreshing the product page in your browser.
 
 1. Display the current routes using the following command:
 ```bash
-oc describe virtualservices | less
-```
-
-2. Deploy `reviews v2` service and refresh the product page until you see BLACK star reviews:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2
-```
-
-3. Deploy `reviews v3` service and refresh the product page until you see RED star reviews:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
+oc get virtualservices -n $BOOKINFO_NAMESPACE  #-- there should be virtual services: bookinfo
+oc get destinationrules -n $BOOKINFO_NAMESPACE #-- there should be destination rules: details, ratings, and revies
+oc get gateway -n $BOOKINFO_NAMESPACE          #-- there should be a gateway: bookinfo-gateway
+oc get pods -n $BOOKINFO_NAMESPACE             #-- there should be bookinfo pods
 ```
 
 #### Virtual Services and Destination Rules
@@ -46,6 +39,16 @@ rules are evaluated, so they apply to the traffic’s “real” destination.
 1. Apply `Destination Rules` using the following command:
 ```bash
 oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES_YAML
+```
+
+2. Deploy `reviews v2` service and refresh the product page until you see BLACK star reviews:
+```bash
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2
+```
+
+3. Deploy `reviews v3` service and refresh the product page until you see RED star reviews:
+```bash
+oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3
 ```
 
 #### Virtual Service
@@ -189,6 +192,7 @@ spec:
       version: v3
 EOF
 ```
+
 ## Walk-Through
 Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference 
 application. 

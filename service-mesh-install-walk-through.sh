@@ -29,7 +29,6 @@ DEMO_CMD_COLOR=$BLACK
 # hide the evidence
 clear
 
-
 ########################
 # include the install
 ########################
