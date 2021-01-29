@@ -48,7 +48,7 @@ export BOOKINFO_PROJECT_NAME=bookinfo-project
 export BOOKINFO_SERVICE_MESH_USER_NAME=user-bookinfo-service-mesh
 export BOOKINFO_VIRTUAL_SERVICE_NAME=bookinfo
 export BOOKINFO_GATEWAY_NAME=bookinfo-gateway
-export SERVICE_MESH_CONTROL_PLANE_NAME=${CONTROL_PLANE_PROJECT_NAME}-control-plane
+export SERVICE_MESH_CONTROL_PLANE_NAME=basic
 export SERVICE_MESH_ROLE_BINDING_NAME=service-mesh-users
 export SERVICE_MESH_MEMBER_NAME=default
 export SERVICE_MESH_SUBSCRIPTION_NAME=servicemeshoperator
@@ -153,6 +153,9 @@ metadata:
   name: ${SERVICE_MESH_CONTROL_PLANE_NAME}
 spec:
   version: v2.0
+  security:
+    controlPlane:
+      mtls: true  
   tracing:
     type: Jaeger
     sampling: 10000
@@ -540,6 +543,9 @@ metadata:
   name: productpage
 spec:
   host: productpage
+  trafficPolicy:
+    tls:
+      mode: DISABLE
   subsets:
   - name: v1
     labels:
@@ -551,6 +557,9 @@ metadata:
   name: reviews
 spec:
   host: reviews
+  trafficPolicy:
+    tls:
+      mode: DISABLE
   subsets:
   - name: v1
     labels:
@@ -562,6 +571,9 @@ metadata:
   name: ratings
 spec:
   host: ratings
+  trafficPolicy:
+    tls:
+      mode: DISABLE
   subsets:
   - name: v1
     labels:
@@ -573,6 +585,9 @@ metadata:
   name: details
 spec:
   host: details
+  trafficPolicy:
+    tls:
+      mode: DISABLE
   subsets:
   - name: v1
     labels:
