@@ -9,20 +9,22 @@ reference application to allow us to test drive our deployment.
 > Use the [Quick-Start](#quick-start) if you just want to stand everything up automatically.
 
 ## Table Of Contents
-- [Operator Installation](#operator-installation)
+- [Assumptions](#assumptions)
+- [Environment Variables](#environment-variables)
+- [Red Hat Elasticsearch Operator](#red-hat-elasticsearch-operator)
+- [Red Hat Jaeger Operator](#red-hat-jaeger-operator)
+- [Red Hat Kiali Operator](#red-hat-kiali-operator)
+- [Red Hat Service Mesh Operator](#red-hat-service-mesh-operator)
 - [Control Plane Deployment](#control-plane-deployment)
-- [Service Member Deployment](#service-member-deployment)
-- [Application Deployment](#applicaiton-deployment)
-- [Tools](#tools)
+- [Service Mesh Member Deployment](#service-mesh-member-deployment)
+- [Bookinfo Application Deployment](#bookinfo-application-deployment)
+- [Verify Deployment](#verify-deployment)
 - [Walk-Through](#walk-through)
 - [Quick-Start](#quick-start)
 - [Cleanup](#cleanup)
 - [References](#references)
 
-## Operator Installation
-To install the operators, you must log in to the OpenShift Container Platform as a user with the cluster-admin role.
-
-### Assumptions
+## Assumptions
 1. Access to the `oc command`
 2. Access to a user with cluster-admin permissions
 3. Access to an installed OpenShift Container Platform 4.6 deployment
@@ -32,15 +34,19 @@ To install the operators, you must log in to the OpenShift Container Platform as
 source <(oc completion bash)
 ``` 
 
-## Export Environment Variables
+## Environment Variables
 To configure the environment we need to set variables for our projects and service mesh. 
 
 1. Set the environment variables using the following command:
 ```bash
 export OPERATORS_PROJECT_NAME=openshift-operators
 export CONTROL_PLANE_PROJECT_NAME=istio-system-project
+export BOOKINFO_APP_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
+export BOOKINFO_DEST_RULES_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
+export BOOKINFO_GATEWAY_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
 export BOOKINFO_PROJECT_NAME=bookinfo-project
 export BOOKINFO_SERVICE_MESH_USER_NAME=user-bookinfo-service-mesh
+export BOOKINFO_VIRTUAL_SERVICE_NAME=bookinfo
 export BOOKINFO_GATEWAY_NAME=bookinfo-gateway
 export SERVICE_MESH_CONTROL_PLANE_NAME=${CONTROL_PLANE_PROJECT_NAME}-control-plane
 export SERVICE_MESH_ROLE_BINDING_NAME=service-mesh-users
@@ -51,13 +57,9 @@ export SERVICE_MESH_MEMBER_ROLL_NAME=default
 export KIALI_SUBSCRIPTION_NAME=kiali-ossm
 export JAEGER_SUBSCRIPTION_NAME=jaeger-product-subscription
 export ELASTIC_SEARCH_SUBSCRIPTION_NAME=elasticsearch-subscription
-export BOOKINFO_APP_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
-export BOOKINFO_DEST_RULES_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
-export BOOKINFO_GATEWAY_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
-export BOOKINFO_VIRTUAL_SERVICE_NAME=bookinfo
 ```
 
-### Installing the Red Hat Elasticsearch Operator
+## Red Hat Elasticsearch Operator
 Elasticsearch, based on the open source Elasticsearch project.
 
 1. Create a Subscription object using the following command:
@@ -76,7 +78,7 @@ spec:
 EOF
 ```
 
-### Install the Red Hat Jaeger Operator
+## Red Hat Jaeger Operator
 Jaeger, based on the open source Jaeger project, lets you perform tracing to monitor and troubleshoot transactions.
  
 1. Create a Subscription object using the following command:
@@ -95,7 +97,7 @@ spec:
 EOF
 ```
 
-### Install the Red Hat Kiali Operator
+## Red Hat Kiali Operator
 Kiali - based on the open source Kiali project, provides observability for your service mesh. By using Kiali you can 
 view configurations, monitor traffic, and view and analyze traces in a single console.
 
@@ -115,7 +117,7 @@ spec:
 EOF
 ```
 
-### Install the Red Hat Service Mesh Operator
+## Red Hat Service Mesh Operator
 Red Hat Service Mesh, based on the Maistra/istio project provide a platform to network and secure applications.
 
 1. Create a new subscription that deploys the service mesh operator.
@@ -134,7 +136,7 @@ spec:
 EOF
 ```
 
-## Control Plane Deployment 
+## Control Plane Deployment
 We need a project to deploy and configure our control plane which will act as the central controller for the service mesh.
 
 1. Create a project for the `Control Plane` using the following commands:
@@ -174,7 +176,7 @@ EOF
 oc get smcp -n ${CONTROL_PLANE_PROJECT_NAME}
 ```
 
-### Create Service Mesh Member User
+## Service Mesh Member Deployment
 Create a user to access resources that does not have privileges to add members to the ServiceMeshMemberRoll directly.
 
 1. Create a `user` for each project in the service mesh using the following commands:
@@ -229,7 +231,7 @@ subjects:
 EOF
 ```
 
-### Create the Bookinfo application
+## Bookinfo Application Deployment
 
 1. Create a project for the applications using the following commands:
 ```bash
@@ -523,12 +525,12 @@ oc apply -n ${BOOKINFO_PROJECT_NAME} -f- <<EOF
 EOF
 ```
 
-3. Verify the `VirtualServices` using the following commands:
+4. Verify the `VirtualServices` using the following commands:
 ```bash
 oc get virtualservices -n ${BOOKINFO_PROJECT_NAME}
 ```
 
-4. Destination rules configure what happens to traffic for that destination after virtual service routing
+5. Destination rules configure what happens to traffic for that destination after virtual service routing
    rules are evaluated. Apply `Destination Rules` to expose v1 destinations using the following command:
 ```bash
 oc apply -n ${BOOKINFO_PROJECT_NAME} -f- <<EOF
@@ -579,12 +581,12 @@ spec:
 EOF
 ```
 
-5. List the `DestinationRule` using the following command:
+6. List the `DestinationRule` using the following command:
 ```bash
 oc get destinationrules -n${BOOKINFO_PROJECT_NAME}
 ```
 
-6. Deploy the `Gateway` configuration using the following command:
+7. Deploy the `Gateway` configuration using the following command:
 ```bash
 oc apply -n ${BOOKINFO_PROJECT_NAME} -f- <<EOF
 apiVersion: networking.istio.io/v1alpha3
@@ -632,7 +634,7 @@ spec:
 EOF
 ```
 
-### Verify Deployment
+## Verify Deployment
 
 1. List the running `Pods` using the following command:
 ```bash
@@ -666,19 +668,19 @@ You should see that the traffic is routed to the v1 services.
 ## Walk-Through
 **Note** the walk through requires `Curl` and `Pipe Viewer` to be installed on your system.
 
-1. Download demo-magic script using the following commands:
+1. Download walk-through scripts using the following commands:
 ```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
-```
-
-2. Download walk through script using the following command:
-```bash
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-export.sh \
+     --output service-mesh-export.sh
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install.sh \
+     --output service-mesh-install.sh
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install-walk-through.sh \
      --output service-mesh-install-walk-through.sh
 ```
 
-3. Execute the walk through using the following command:
+2. Execute the walk-through using the following command:
 ```bash
 sh ./service-mesh-install-walk-through.sh
 ```
@@ -689,25 +691,19 @@ explore the tools and get right to it.
 
 **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
 
-1. Download demo-magic script using the following commands:
+1. Download walk-through scripts using the following commands:
 ```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
-```
-
-2. Download the quick-start script using the following command:
-```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-quick-start.sh \
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-export.sh \
+     --output service-mesh-export.sh
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install.sh \
+     --output service-mesh-install.sh
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-quick-start.sh \
      --output service-mesh-quick-start.sh
 ```
 
-3. Download the install script using the following command:
-```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-install.sh \
-     --output service-mesh-install.sh
-```
-
-4. Execute the quick-start using the following command:
+2. Execute the quick-start using the following command:
 ```bash
 sh ./service-mesh-quick-start.sh
 ```
@@ -736,7 +732,6 @@ unset SERVICE_MESH_MEMBER_ROLL_NAME
 unset KIALI_SUBSCRIPTION_NAME
 unset JAEGER_SUBSCRIPTION_NAME
 unset ELASTIC_SEARCH_SUBSCRIPTION_NAME
-
 ```
 
 ## References
@@ -751,6 +746,6 @@ unset ELASTIC_SEARCH_SUBSCRIPTION_NAME
 ### Upstream Projects
 - [Istio Release 1.6.14](https://istio.io/latest/news/releases/1.6.x/announcing-1.6.14/) 
 
-## Trouble Shooting
+### Trouble Shooting
 - [Unable To Delete PROJECT](https://access.redhat.com/solutions/4165791)
 
