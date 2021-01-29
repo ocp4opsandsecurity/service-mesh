@@ -11,13 +11,10 @@ reference application to allow us to test drive our deployment.
 ## Table Of Contents
 - [Assumptions](#assumptions)
 - [Environment Variables](#environment-variables)
-- [Red Hat Elasticsearch Operator](#red-hat-elasticsearch-operator)
-- [Red Hat Jaeger Operator](#red-hat-jaeger-operator)
-- [Red Hat Kiali Operator](#red-hat-kiali-operator)
-- [Red Hat Service Mesh Operator](#red-hat-service-mesh-operator)
+- [Red Hat Operators](#red-hat-operators)
 - [Control Plane Deployment](#control-plane-deployment)
 - [Service Mesh Member Deployment](#service-mesh-member-deployment)
-- [Bookinfo Application Deployment](#bookinfo-application-deployment)
+- [Application Deployment](#application-deployment)
 - [Verify Deployment](#verify-deployment)
 - [Walk-Through](#walk-through)
 - [Quick-Start](#quick-start)
@@ -39,14 +36,15 @@ To configure the environment we need to set variables for our projects and servi
 
 1. Set the environment variables using the following command:
 ```bash
-export OPERATORS_PROJECT_NAME=openshift-operators
+export MAISTRA_BRANCH=maistra-2.0
 export CONTROL_PLANE_PROJECT_NAME=istio-system-project
-export BOOKINFO_APP_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/platform/kube/bookinfo.yaml
-export BOOKINFO_DEST_RULES_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/destination-rule-all.yaml
-export BOOKINFO_GATEWAY_YAML_URL=https://raw.githubusercontent.com/Maistra/istio/maistra-2.0/samples/bookinfo/networking/bookinfo-gateway.yaml
+export BOOKINFO_APP_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/platform/kube/bookinfo.yaml
+export BOOKINFO_DEST_RULES_ALL_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/networking/destination-rule-all.yaml
+export BOOKINFO_GATEWAY_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/networking/bookinfo-gateway.yaml
 export BOOKINFO_PROJECT_NAME=bookinfo-project
 export BOOKINFO_SERVICE_MESH_USER_NAME=user-bookinfo-service-mesh
 export BOOKINFO_VIRTUAL_SERVICE_NAME=bookinfo
+export BOOKINFO_VIRTUAL_SERVICE_V1_URL=https://github.com/maistra/istio/raw/${MAISTRA_BRANCH}/samples/bookinfo/networking/virtual-service-all-v1.yaml
 export BOOKINFO_GATEWAY_NAME=bookinfo-gateway
 export SERVICE_MESH_CONTROL_PLANE_NAME=basic
 export SERVICE_MESH_ROLE_BINDING_NAME=service-mesh-users
@@ -59,12 +57,24 @@ export JAEGER_SUBSCRIPTION_NAME=jaeger-product-subscription
 export ELASTIC_SEARCH_SUBSCRIPTION_NAME=elasticsearch-subscription
 ```
 
-## Red Hat Elasticsearch Operator
-Elasticsearch, based on the open source Elasticsearch project.
-
-1. Create a Subscription object using the following command:
+## Create Projects
+1. Create a project for the `Control Plane` using the following commands:
 ```bash
-oc apply -n ${OPERATORS_PROJECT_NAME} -f- <<EOF
+oc new-project ${CONTROL_PLANE_PROJECT_NAME}
+```
+
+2. Create a project for the applications using the following commands:
+```bash
+oc new-project ${BOOKINFO_PROJECT_NAME}
+```
+
+## Red Hat Operators
+1. Install the operators needed to deploy the service mesh using the following command:
+```bash
+oc apply -n ${CONTROL_PLANE_PROJECT_NAME} -f- <<EOF
+########################################################################################################################
+# Red Hat Elasticsearch, based on the open source Elasticsearch project.
+########################################################################################################################
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -75,15 +85,11 @@ spec:
   name: elasticsearch-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-EOF
-```
-
-## Red Hat Jaeger Operator
-Jaeger, based on the open source Jaeger project, lets you perform tracing to monitor and troubleshoot transactions.
- 
-1. Create a Subscription object using the following command:
-```bash
-oc apply -n ${OPERATORS_PROJECT_NAME} -f- <<EOF
+---
+########################################################################################################################
+# Red Hat Jaeger Operator, based on the open source Jaeger project, lets you perform tracing to monitor and 
+# troubleshoot transactions.
+########################################################################################################################
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -94,16 +100,11 @@ spec:
   name: jaeger-product
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-EOF
-```
-
-## Red Hat Kiali Operator
-Kiali - based on the open source Kiali project, provides observability for your service mesh. By using Kiali you can 
-view configurations, monitor traffic, and view and analyze traces in a single console.
-
-1. Create a Subscription object using the following command:
-```bash
-oc apply -n ${OPERATORS_PROJECT_NAME} -f- <<EOF
+---
+########################################################################################################################
+# Red Hat Kiali Operator - based on the open source Kiali project, provides observability for your service mesh. By 
+# using Kiali you can view configurations, monitor traffic, and view and analyze traces in a single console.
+########################################################################################################################
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -114,15 +115,10 @@ spec:
   name: kiali-ossm
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-EOF
-```
-
-## Red Hat Service Mesh Operator
-Red Hat Service Mesh, based on the Maistra/istio project provide a platform to network and secure applications.
-
-1. Create a new subscription that deploys the service mesh operator.
-```bash
-oc apply -n ${OPERATORS_PROJECT_NAME} -f- <<EOF
+---
+########################################################################################################################
+# Red Hat Service Mesh, based on the Maistra/istio project provide a platform to network and secure applications.
+########################################################################################################################
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -137,16 +133,20 @@ EOF
 ```
 
 ## Control Plane Deployment
-We need a project to deploy and configure our control plane which will act as the central controller for the service mesh.
+We need configure our control plane which will act as the central controller for the service mesh.
 
-1. Create a project for the `Control Plane` using the following commands:
+1. Create a `user` for each project in the service mesh using the following command:
 ```bash
-oc new-project ${CONTROL_PLANE_PROJECT_NAME}
+oc create user ${BOOKINFO_SERVICE_MESH_USER_NAME}
 ```
 
-2. Create a ServiceMeshControlPlane object using the following command:
+2. Create `ServiceMeshControlPlane`, `ServiceMeshMember`, `ServiceMeshMemberRoll`, and `RoleBindings` resources 
+   using the following command:
 ```bash
 oc apply -n ${CONTROL_PLANE_PROJECT_NAME} -f- <<EOF
+########################################################################################################################
+# Create a ServiceMeshControlPlane resource
+########################################################################################################################
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
@@ -171,25 +171,10 @@ spec:
     grafana:
       enabled: true
       name: grafana
-EOF
-```
-
-3. Get the control plane installation status using the following command:
-```bash
-oc get smcp -n ${CONTROL_PLANE_PROJECT_NAME}
-```
-
-## Service Mesh Member Deployment
-Create a user to access resources that does not have privileges to add members to the ServiceMeshMemberRoll directly.
-
-1. Create a `user` for each project in the service mesh using the following commands:
-```bash
-oc create user ${BOOKINFO_SERVICE_MESH_USER_NAME}
-```
-
-2. Create a service mesh member binding between the 
-```bash
-oc apply -n ${CONTROL_PLANE_PROJECT_NAME} -f- <<EOF
+---
+########################################################################################################################
+# Create a ServiceMeshMember resource
+########################################################################################################################
 apiVersion: maistra.io/v1
 kind: ServiceMeshMember
 metadata:
@@ -198,12 +183,10 @@ spec:
   controlPlaneRef:
     namespace: ${CONTROL_PLANE_PROJECT_NAME}
     name: ${BOOKINFO_SERVICE_MESH_USER_NAME}
-EOF
-```
-
-3. Create a `ServiceMeshMemberRoll` resource using the following command:
-```bash
-oc apply -n ${CONTROL_PLANE_PROJECT_NAME} -f- <<EOF
+---
+########################################################################################################################
+# Create a ServiceMeshMemberRoll resource
+########################################################################################################################
 apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
 metadata:
@@ -212,12 +195,10 @@ spec:
   members:
     # a list of projects joined into the service mesh
     - ${BOOKINFO_PROJECT_NAME}
-EOF
-```
-  
-4. Create the `RoleBinding` for the service mesh user using the following command:
-```bash
-oc apply -n ${CONTROL_PLANE_PROJECT_NAME} -f- <<EOF
+---
+########################################################################################################################
+# Create the RoleBinding for the service mesh user
+########################################################################################################################
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -231,422 +212,48 @@ subjects:
 - apiGroup: rbac.authorization.k8s.io
   kind: User
   name: ${BOOKINFO_SERVICE_MESH_USER_NAME}
-EOF
-```
-
-## Bookinfo Application Deployment
-
-1. Create a project for the applications using the following commands:
-```bash
-oc new-project ${BOOKINFO_PROJECT_NAME}
-```
-
-2. Deploy `v1` Service, ServiceAccount,  using the following commands
-```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f- <<EOF
-##################################################################################################
-# Details service
-##################################################################################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: details
-  labels:
-    app: details
-    service: details
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: details
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-details
-  labels:
-    account: details
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: details-v1
-  labels:
-    app: details
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: details
-      version: v1
-  template:
-    metadata:
-      labels:
-        app: details
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-details
-      containers:
-      - name: details
-        image: maistra/examples-bookinfo-details-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
----
-##################################################################################################
-# Ratings service
-##################################################################################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: ratings
-  labels:
-    app: ratings
-    service: ratings
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: ratings
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-ratings
-  labels:
-    account: ratings
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: ratings-v1
-  labels:
-    app: ratings
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: ratings
-      version: v1
-  template:
-    metadata:
-      labels:
-        app: ratings
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-ratings
-      containers:
-      - name: ratings
-        image: maistra/examples-bookinfo-ratings-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
----
-##################################################################################################
-# Reviews service
-##################################################################################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: reviews
-  labels:
-    app: reviews
-    service: reviews
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: reviews
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-reviews
-  labels:
-    account: reviews
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: reviews-v1
-  labels:
-    app: reviews
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: reviews
-      version: v1
-  template:
-    metadata:
-      labels:
-        app: reviews
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-reviews
-      containers:
-      - name: reviews
-        image: maistra/examples-bookinfo-reviews-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: LOG_DIR
-          value: "/tmp/logs"
-        ports:
-        - containerPort: 9080
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: wlp-output
-          mountPath: /opt/ibm/wlp/output
-      volumes:
-      - name: wlp-output
-        emptyDir: {}
-      - name: tmp
-        emptyDir: {}
----
-##################################################################################################
-# Productpage services
-##################################################################################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: productpage
-  labels:
-    app: productpage
-    service: productpage
-spec:
-  ports:
-  - port: 9080
-    name: http
-  selector:
-    app: productpage
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: bookinfo-productpage
-  labels:
-    account: productpage
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: productpage-v1
-  labels:
-    app: productpage
-    version: v1
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: productpage
-      version: v1
-  template:
-    metadata:
-      labels:
-        app: productpage
-        version: v1
-    spec:
-      serviceAccountName: bookinfo-productpage
-      containers:
-      - name: productpage
-        image: maistra/examples-bookinfo-productpage-v1:2.0.0
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 9080
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-      volumes:
-      - name: tmp
-        emptyDir: {}
 ---
 EOF
 ```
 
-3. Think of virtual services as how traffic is routed to a given destination. Each virtual service consists of a set of routing rules that are evaluated in order. So to route all traffic to subset, `v1`, only use the following command:
+## Application Deployment
+We are going to deploy the bookinfo application.
+
+> **!!! Caution !!!** 
+> [Set Default Routes For Services](https://istio.io/latest/docs/ops/best-practices/traffic-management/#set-default-routes-for-services)
+> **!!! Caution !!!**
+
+1. Destination rules configure what happens to traffic for that destination after virtual service routing
+   rules are evaluated. Apply `DestinationRule` to expose v1 destinations using the following command:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f- <<EOF
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: details
-  spec:
-    hosts:
-    - details
-    http:
-    - route:
-      - destination:
-          host: details
-          subset: v1
----
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: productpage
-  spec:
-    hosts:
-    - productpage
-    http:
-    - route:
-      - destination:
-          host: productpage
-          subset: v1
----
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: ratings
-  spec:
-    hosts:
-    - ratings
-    http:
-    - route:
-      - destination:
-          host: ratings
-          subset: v1
----
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: reviews
-  spec:
-    hosts:
-    - reviews
-    http:
-    - route:
-      - destination:
-          host: reviews
-          subset: v1
----
-EOF
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_DEST_RULES_ALL_URL}
 ```
 
-4. Verify the `VirtualServices` using the following commands:
+2. Think of virtual services as how traffic is routed to a given destination. Each virtual service consists of a set 
+   of routing rules that are evaluated in order. So to route all traffic to subset, `v1`, only use the following command:
 ```bash
-oc get virtualservices -n ${BOOKINFO_PROJECT_NAME}
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_VIRTUAL_SERVICE_V1_URL}
 ```
 
-5. Destination rules configure what happens to traffic for that destination after virtual service routing
-   rules are evaluated. Apply `Destination Rules` to expose v1 destinations using the following command:
+3. Deploy subset `v1` Services, ServiceAccounts, and Deployments using the following commands
 ```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: productpage
-spec:
-  host: productpage
-  trafficPolicy:
-    tls:
-      mode: DISABLE
-  subsets:
-  - name: v1
-    labels:
-      version: v1
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: reviews
-spec:
-  host: reviews
-  trafficPolicy:
-    tls:
-      mode: DISABLE
-  subsets:
-  - name: v1
-    labels:
-      version: v1
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: ratings
-spec:
-  host: ratings
-  trafficPolicy:
-    tls:
-      mode: DISABLE
-  subsets:
-  - name: v1
-    labels:
-      version: v1
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: details
-spec:
-  host: details
-  trafficPolicy:
-    tls:
-      mode: DISABLE
-  subsets:
-  - name: v1
-    labels:
-      version: v1
----
-EOF
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=reviews            # reviews Service
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=reviews            # reviews ServiceAccount
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=reviews,version=v1     # reviews-v1 Deployment
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=details            # details Service
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=details            # details ServiceAccount
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=details,version=v1     # details-v1 Deployment
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=productpage        # productpage Service
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=productpage        # productpage ServiceAccount
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=productpage,version=v1 # productpage-v1 Deployment
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=ratings            # ratings Service
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=ratings            # ratings ServiceAccount
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=ratings,version=v1     # ratings-v1 Deployment
 ```
 
-6. List the `DestinationRule` using the following command:
+6. Deploy the `Gateway` configuration using the following command:
 ```bash
-oc get destinationrules -n${BOOKINFO_PROJECT_NAME}
-```
-
-7. Deploy the `Gateway` configuration using the following command:
-```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: ${BOOKINFO_GATEWAY_NAME}
-spec:
-  selector:
-    istio: ingressgateway # use istio default controller
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "*"
----
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: ${BOOKINFO_VIRTUAL_SERVICE_NAME}
-spec:
-  hosts:
-  - "*"
-  gateways:
-  - ${BOOKINFO_GATEWAY_NAME}
-  http:
-  - match:
-    - uri:
-        exact: /productpage
-    - uri:
-        prefix: /static
-    - uri:
-        exact: /login
-    - uri:
-        exact: /logout
-    - uri:
-        prefix: /api/v1/products
-    route:
-    - destination:
-        host: productpage
-        port:
-          number: 9080
----
-EOF
+oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_GATEWAY_URL}
 ```
 
 ## Verify Deployment
@@ -661,12 +268,17 @@ oc get pods -n ${BOOKINFO_PROJECT_NAME}
 oc get route -n ${CONTROL_PLANE_PROJECT_NAME}
 ```   
 
-3. List the `Gateway` URL using the following command:
+3. Get the control plane installation status using the following command:
+```bash
+oc get smcp -n ${CONTROL_PLANE_PROJECT_NAME}
+```
+
+4. Export the `Gateway` URL using the following command:
 ```bash
 export GATEWAY_URL=$(oc -n ${CONTROL_PLANE_PROJECT_NAME} get route istio-ingressgateway -o jsonpath='{.spec.host}')
 ```
 
-4. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser. 
+5. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser. 
 ```bash
 echo http://${GATEWAY_URL}/productpage
 ```
@@ -727,17 +339,34 @@ sh ./service-mesh-quick-start.sh
 When you are finished you can remove the resources that we installed. 
 > CAUTION: Removing any shared ElasticSearch, Kiali, Jeager, or Service Mesh subscriptions!
 
-1. Unset environment variables using the following command:
+1. Remove `Bookinfo` project using the following command:
 ```bash
+oc delete project ${BOOKINFO_PROJECT_NAME}
+```   
+
+2. Delete the `Control Plane Project` using the following command:
+```bash
+oc delete project ${CONTROL_PLANE_PROJECT_NAME}
+```
+
+3. Delete the `Service Mesh User` using the following command:
+```bash
+oc delete user ${BOOKINFO_SERVICE_MESH_USER_NAME}
+```
+
+3. Unset environment variables using the following command:
+```bash
+unset MAISTRA_BRANCH
 unset OPERATORS_PROJECT_NAME
 unset CONTROL_PLANE_PROJECT_NAME
-unset BOOKINFO_APP_YAML_URL
-unset BOOKINFO_DEST_RULES_YAML_URL
-unset BOOKINFO_GATEWAY_YAML_URL
+unset BOOKINFO_APP_URL
+unset BOOKINFO_DEST_RULES_ALL_URL
+unset BOOKINFO_GATEWAY_URL
 unset BOOKINFO_GATEWAY_NAME
 unset BOOKINFO_PROJECT_NAME
 unset BOOKINFO_SERVICE_MESH_USER_NAME
 unset BOOKINFO_VIRTUAL_SERVICE_NAME
+unset BOOKINFO_VIRTUAL_SERVICE_V1_URL
 unset SERVICE_MESH_CONTROL_PLANE_NAME
 unset SERVICE_MESH_ROLE_BINDING_NAME
 unset SERVICE_MESH_MEMBER_NAME
