@@ -31,9 +31,8 @@ clear
 
 pe "oc delete project ${BOOKINFO_PROJECT_NAME}"
 pe "oc delete project ${CONTROL_PLANE_PROJECT_NAME}"
-pe "oc delete user ${BOOKINFO_SERVICE_MESH_USER_NAME}"
 
 ########################
 # include the install
 ########################
-. ./service-mesh-export.sh
+. ./service-mesh-unset.sh

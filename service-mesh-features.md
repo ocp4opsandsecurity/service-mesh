@@ -1,11 +1,23 @@
 # service-mesh-features
 How to that explores many of the powerful Service Mesh features covered in the Istio BookInfo reference application.
 
-> Use the [Quick-Start](#quick-start) if you just want to configure environment variables and the service mesh deployment.
+The Bookinfo application consists of these microservices:
+
+- The productpage microservice calls the details and reviews microservices to populate the page.
+- The details microservice contains book information.
+- The reviews microservice contains book reviews. It also calls the ratings microservice.
+- The ratings microservice contains book ranking information that accompanies a book review.
+
+There are three versions of the reviews microservice:
+
+- Version v1 does not call the ratings Service.
+- Version v2 calls the ratings Service and displays each rating as one to five black stars.
+- Version v3 calls the ratings Service and displays each rating as one to five red stars.
+
+> Use the [Quick-Start](#quick-start) to configure environment variables and the service mesh deployment.
 
 - [Assumptions](#assumptions)
 - [Traffic Management](#traffic-management)
-  - [Request Routing](#request-routing)
 - [Walk-Through](#walk-through)
 - [Quick-Start](#quick-start)
 - [References](#references)
@@ -13,291 +25,51 @@ How to that explores many of the powerful Service Mesh features covered in the I
 ## Assumptions
 - Red Hat OpenShift Service Mesh is installed and configured using the [Quick-Start](#quick-start) or the procedure as 
 described in the [Service Mesh Install](service-mesh-install.md) how-to.
+  
+## Verify Deployment
+
+1. List the running `Pods` using the following command:
+```bash
+oc get pods -n bookinfo
+```
+
+2. List the `Tools` routes using the following command:
+```bash
+oc get route -n istio-system
+```   
+
+3. List the `Gateway` URL using the following command:
+```bash
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+```
+
+4. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser.
+```bash
+echo http://${GATEWAY_URL}/productpage
+```
+
+You should see that the traffic is routed to the v1 services.
+
+> An extremely entertaining play by Shakespeare. The slapstick humour is refreshing!
+> - Reviewer1
+
+> Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.
+> - Reviewer2
 
 ## Traffic Management
-Traffic routing lets you control the flow of traffic between services.
+Traffic routing lets you control the flow of traffic between service versions.
 
 ### Request Routing
-Request routing by defaults routes traffic to all available service versions in a round-robin fashion. To demonstrate, deploy
-both the `reiews v2` and `reviews v3` along side `review v1` of the reviews service. Observe the traffic dynamically 
-switch between service versions by refreshing the product page in your browser.
+Request routing by defaults routes traffic to all available service versions in a round-robin fashion. 
 
-1. Display the current routes using the following command:
-```bash
-oc get virtualservices -n $BOOKINFO_NAMESPACE  #-- there should be virtual services: bookinfo
-oc get destinationrules -n $BOOKINFO_NAMESPACE #-- there should be destination rules: details, ratings, and revies
-oc get gateway -n $BOOKINFO_NAMESPACE          #-- there should be a gateway: bookinfo-gateway
-oc get pods -n $BOOKINFO_NAMESPACE             #-- there should be bookinfo pods
-```
-
-#### Virtual Services and Destination Rules
-Think of virtual services as how you route your traffic to a given destination, and then you use destination rules to 
-configure what happens to traffic for that destination. Destination rules are applied after virtual service routing 
-rules are evaluated, so they apply to the traffic’s “real” destination.
-
-1. Apply `Destination Rules` using the following command:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: productpage
-spec:
-  host: productpage
-  subsets:
-  - name: v1
-    labels:
-      version: v1
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: reviews
-spec:
-  host: reviews
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v3
-    labels:
-      version: v3
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: ratings
-spec:
-  host: ratings
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v2-mysql
-    labels:
-      version: v2-mysql
-  - name: v2-mysql-vm
-    labels:
-      version: v2-mysql-vm
----
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: details
-spec:
-  host: details
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
----
-EOF
-```
-
-2. Deploy `reviews v2` service and refresh the product page until you see BLACK star reviews:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: reviews-v2
-  labels:
-    app: reviews
-    version: v2
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: reviews
-      version: v2
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-        app: reviews
-        version: v2
-    spec:
-      serviceAccountName: bookinfo-reviews
-      containers:
-      - name: reviews
-        image: maistra/examples-bookinfo-reviews-v2:2.0.0
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: LOG_DIR
-          value: "/tmp/logs"
-        ports:
-        - containerPort: 9080
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: wlp-output
-          mountPath: /opt/ibm/wlp/output
-      volumes:
-      - name: wlp-output
-        emptyDir: {}
-      - name: tmp
-        emptyDir: {}
-EOF
-```
-
-3. Deploy `reviews v3` service and refresh the product page until you see RED star reviews:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: reviews-v3
-  labels:
-    app: reviews
-    version: v3
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: reviews
-      version: v3
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-        app: reviews
-        version: v3
-    spec:
-      serviceAccountName: bookinfo-reviews
-      containers:
-      - name: reviews
-        image: maistra/examples-bookinfo-reviews-v3:2.0.0
-        imagePullPolicy: IfNotPresent
-        env:
-        - name: LOG_DIR
-          value: "/tmp/logs"
-        ports:
-        - containerPort: 9080
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        - name: wlp-output
-          mountPath: /opt/ibm/wlp/output
-      volumes:
-      - name: wlp-output
-        emptyDir: {}
-      - name: tmp
-        emptyDir: {}
-EOF
-```
-
-#### Virtual Service
-A virtual service lets you configure how requests are routed to a service within a service mesh, building on the basic
-connectivity and discovery provided by the service mesh platform. Each virtual service consists of a set of routing
-rules that are evaluated in order, letting the service mesh match each request to the virtual service to a specific real 
-destination within the mesh.
-
-1. Route all traffic to subset, `v1`, only use the following command:
+1. Deploy `reviews v2` virtual service until you see BLACK star reviews using the following commands:
 ```bash
 oc apply -f- <<EOF
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: details
-  spec:
-    hosts:
-    - details
-    http:
-    - route:
-      - destination:
-          host: details
-          subset: v1
----
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: productpage
-  spec:
-    hosts:
-    - productpage
-    http:
-    - route:
-      - destination:
-          host: productpage
-          subset: v1
----
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: ratings
-  spec:
-    hosts:
-    - ratings
-    http:
-    - route:
-      - destination:
-          host: ratings
-          subset: v1
----
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: reviews
-  spec:
-    hosts:
-    - reviews
-    http:
-    - route:
-      - destination:
-          host: reviews
-          subset: v1
----
-EOF
-```
-
-#### A/B Testing
-A/B testing is a method of comparing two versions.
-
-1. Route 100% of review traffic to version `v2` using the following command:
-```bash
-oc apply -f- <<EOF
-  apiVersion: networking.istio.io/v1beta1
-  kind: VirtualService
-  metadata:
-    name: reviews
-  spec:
-    hosts:
-    - reviews
-    http:
-    - route:
-      - destination:
-          host: reviews
-          subset: v2
-EOF
-```
-
-#### Load Balancing
-Round-robin is the default load balancing policy, where each service instance in the instance pool gets a request in turn.
-
-Supported load balancing policy models:
-- **Random:** Requests are forwarded at random to instances in the pool.
-- **Weighted:** Requests are forwarded in the pool according to a specific percentage.
-- **Least requests:** Requests are forwarded to the instances with the least number of requests.
-
-
-1. **Weighted** example routes the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: networking.istio.io/v1beta1
+apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: reviews
+  namespace: bookinfo
 spec:
   hosts:
   - reviews
@@ -306,36 +78,65 @@ spec:
     - destination:
         host: reviews
         subset: v2
-      weight: 85
-    - destination:
-        host: reviews
-        subset: v3
-      weight: 15
+---
 EOF
 ```
 
-2. **Random** example distributes the review traffic to version `v1`, `v2`, `v3` using the following command:
+On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V2
+services with `BLACK Stars`.
+
+2. Deploy `reviews v3` virtual service until you see RED star reviews using the following commands:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+oc apply -f- <<EOF
 apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
+kind: VirtualService
 metadata:
   name: reviews
+  namespace: bookinfo
 spec:
-  host: reviews
-  trafficPolicy:
-    loadBalancer:
-      simple: RANDOM
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v3
-    labels:
-      version: v3
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v3
+---
+EOF
+```
+
+On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
+services with `RED Stars`.
+
+### Load Balancing
+Round-robin is the default load balancing policy, where each service instance in the instance pool gets a request in turn.
+
+Supported load balancing policy models:
+- **Random:** Requests are forwarded at random to instances in the pool.
+- **Weighted:** Requests are forwarded in the pool according to a specific percentage.
+- **Least requests:** Requests are forwarded to the instances with the least number of requests.
+
+1. **Weighted** example routes the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
+```bash
+oc apply -f- <<EOF
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+  namespace: bookinfo
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 90
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 10
 EOF
 ```
 
@@ -345,35 +146,14 @@ version. In this case, all traffic from a user named `Bill` will be routed to th
 `Fred` will be routed to the service reviews:v1. This example is enabled by the fact that the productpage service adds 
 a custom end-user header to all outbound HTTP requests to the reviews service.
 
-1. Reset the reviews `DestinationRule` to all routes.
+1. Deploy the reviews `VirtualService` that matches on `Bill` or `Fred` using the following command:
 ```bash
-oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: DestinationRule
-metadata:
-  name: reviews
-spec:
-  host: reviews
-  subsets:
-  - name: v1
-    labels:
-      version: v1
-  - name: v2
-    labels:
-      version: v2
-  - name: v3
-    labels:
-      version: v3
-EOF
-```
-
-2. Deploy the reviews `VirtualService` that matches on `Bill` or `Fred` using the following command:
-```bash
-oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+oc apply -f- <<EOF
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: reviews
+  namespace: bookinfo
 spec:
   hosts:
   - reviews
@@ -401,13 +181,13 @@ spec:
 EOF
 ```
 
-3. On the /productpage of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
+2. On the /productpage of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
 The BLACK star ratings appear next to each review.
 
-4. On the /productpage of the Bookinfo application, log in as user `Fred`. Refresh the browser. What do you see?
+3. On the /productpage of the Bookinfo application, log in as user `Fred`. Refresh the browser. What do you see?
 The RED star ratings appear next to each review.
 
-5. Log in as another user (pick any name you wish). Refresh the browser. Now the stars are gone. This is because 
+4. Log in as another user (pick any name you wish). Refresh the browser; notice the stars are gone! This is because 
 traffic is routed to reviews:v1 for all users except Bill and Fred.
    
 ## Walk-Through
@@ -466,5 +246,5 @@ sh ./service-mesh-quick-start.sh
 - [Demo Magic](https://github.com/paxtonhare/demo-magic)
 - [Istio Release 1.6.14](https://istio.io/latest/news/releases/1.6.x/announcing-1.6.14/)
 - [Red Hat OpenShift Command Line Tools](https://docs.openshift.com/container-platform/4.6/cli_reference/openshift_cli/getting-started-cli.html#cli-about-cli_cli-developer-commands)
-- [Red Hat Service Mesh](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.6/html-single/service_mesh/index)
-- [Unable To Delete Namespace](https://access.redhat.com/solutions/4165791)
+- # [Red Hat Service Mesh](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.6/html-single/service_mesh/index)
+- [Unable To Delete Project](https://access.redhat.com/solutions/4165791)

@@ -1,8 +1,9 @@
 #!/bin/bash
 
 ########################
-# include the magic
+# include dependencies
 ########################
+. ./service-mesh-export.sh
 . ./demo-magic.sh
 
 
@@ -29,24 +30,24 @@ DEMO_CMD_COLOR=$BLACK
 clear
 
 p "Verify Deployment"
-pe "oc get virtualservices -n $BOOKINFO_NAMESPACE"   #-- there should be virtual services: bookinfo
-pe "oc get destinationrules -n $BOOKINFO_NAMESPACE"  #-- there should be destination rules: details, ratings, and revies
-pe "oc get gateway -n $BOOKINFO_NAMESPACE"           #-- there should be a gateway: bookinfo-gateway
-pe "oc get pods -n $BOOKINFO_NAMESPACE"              #-- there should be bookinfo pods
+pe "oc get virtualservices -n $BOOKINFO_PROJECT"   #-- there should be virtual services: bookinfo
+pe "oc get destinationrules -n $BOOKINFO_PROJECT"  #-- there should be destination rules: details, ratings, and revies
+pe "oc get gateway -n $BOOKINFO_PROJECT"           #-- there should be a gateway: bookinfo-gateway
+pe "oc get pods -n $BOOKINFO_PROJECT"              #-- there should be bookinfo pods
 p ""
 
 p "Deploy destination rules"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_DEST_RULES_YAML"
+pe "oc apply -n $BOOKINFO_PROJECT -f $BOOKINFO_DEST_RULES_YAML"
 pe ""
 clear
 
 p "Deploy reviews v2 (check for BLACK Stars)"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v2"
+pe "oc apply -n $BOOKINFO_PROJECT -f $BOOKINFO_APP_YAML -l app=reviews,version=v2"
 pe ""
 clear
 
 p "Deploy reviews v3 (check for RED Stars)"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f $BOOKINFO_APP_YAML -l app=reviews,version=v3"
+pe "oc apply -n $BOOKINFO_PROJECT -f $BOOKINFO_APP_YAML -l app=reviews,version=v3"
 pe ""
 clear
 
@@ -127,7 +128,7 @@ pe ""
 clear
 
 p "Load Balancing: weighted"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+pe "oc apply -n $BOOKINFO_PROJECT -f- <<EOF
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -150,7 +151,7 @@ pe ""
 clear
 
 p "Load Balancing: random"
-pe "oc apply -n $BOOKINFO_NAMESPACE -f- <<EOF
+pe "oc apply -n $BOOKINFO_PROJECT -f- <<EOF
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:

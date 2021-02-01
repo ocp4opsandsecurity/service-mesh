@@ -37,48 +37,24 @@ To configure the environment we need to set variables for our projects and servi
 1. Set the environment variables using the following command:
 ```bash
 export MAISTRA_BRANCH=maistra-2.0
-export CONTROL_PLANE_PROJECT_NAME=istio-system-project
 export BOOKINFO_APP_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/platform/kube/bookinfo.yaml
-export BOOKINFO_DEST_RULES_ALL_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/networking/destination-rule-all.yaml
+export BOOKINFO_DEST_RULES_ALL_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/networking/destination-rule-all-mtls.yaml
 export BOOKINFO_GATEWAY_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/networking/bookinfo-gateway.yaml
-export BOOKINFO_PROJECT_NAME=bookinfo-project
-export BOOKINFO_SERVICE_MESH_USER_NAME=user-bookinfo-service-mesh
-export BOOKINFO_VIRTUAL_SERVICE_NAME=bookinfo
 export BOOKINFO_VIRTUAL_SERVICE_V1_URL=https://github.com/maistra/istio/raw/${MAISTRA_BRANCH}/samples/bookinfo/networking/virtual-service-all-v1.yaml
-export BOOKINFO_GATEWAY_NAME=bookinfo-gateway
-export SERVICE_MESH_CONTROL_PLANE_NAME=basic
-export SERVICE_MESH_ROLE_BINDING_NAME=service-mesh-users
-export SERVICE_MESH_MEMBER_NAME=default
-export SERVICE_MESH_SUBSCRIPTION_NAME=servicemeshoperator
-export SERVICE_MESH_USER_ROLE_NAME=service-mesh-user
-export SERVICE_MESH_MEMBER_ROLL_NAME=default
-export KIALI_SUBSCRIPTION_NAME=kiali-ossm
-export JAEGER_SUBSCRIPTION_NAME=jaeger-product-subscription
-export ELASTIC_SEARCH_SUBSCRIPTION_NAME=elasticsearch-subscription
-```
-
-## Create Projects
-1. Create a project for the `Control Plane` using the following commands:
-```bash
-oc new-project ${CONTROL_PLANE_PROJECT_NAME}
-```
-
-2. Create a project for the applications using the following commands:
-```bash
-oc new-project ${BOOKINFO_PROJECT_NAME}
 ```
 
 ## Red Hat Operators
 1. Install the operators needed to deploy the service mesh using the following command:
 ```bash
-oc apply -n ${CONTROL_PLANE_PROJECT_NAME} -f- <<EOF
+oc apply -f- <<EOF
 ########################################################################################################################
 # Red Hat Elasticsearch, based on the open source Elasticsearch project.
 ########################################################################################################################
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: ${ELASTIC_SEARCH_SUBSCRIPTION_NAME}
+  name: elasticsearch-operator
+  namespace: openshift-operators-redhat
 spec:
   channel: '4.6'
   installPlanApproval: Automatic
@@ -93,7 +69,8 @@ spec:
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: ${JAEGER_SUBSCRIPTION_NAME}
+  name: jaeger-product
+  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -108,7 +85,8 @@ spec:
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: ${KIALI_SUBSCRIPTION_NAME}
+  name: kiali-ossm
+  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
@@ -122,40 +100,46 @@ spec:
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: ${SERVICE_MESH_SUBSCRIPTION_NAME}
+  name: servicemeshoperator
+  namespace: openshift-operators
 spec:
   channel: stable
   installPlanApproval: Automatic
   name: servicemeshoperator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
+---
 EOF
+```
+
+## Create Projects
+1. Create a project for the `Control Plane` using the following commands:
+```bash
+oc new-project istio-system
+```
+
+2. Create a project for the applications using the following commands:
+```bash
+oc new-project bookinfo
 ```
 
 ## Control Plane Deployment
 We need configure our control plane which will act as the central controller for the service mesh.
 
-1. Create a `user` for each project in the service mesh using the following command:
-```bash
-oc create user ${BOOKINFO_SERVICE_MESH_USER_NAME}
-```
-
-2. Create `ServiceMeshControlPlane`, `ServiceMeshMember`, `ServiceMeshMemberRoll`, and `RoleBindings` resources 
+1. Create `ServiceMeshControlPlane`, `ServiceMeshMember`, `ServiceMeshMemberRoll`, and `RoleBindings` resources 
    using the following command:
 ```bash
-oc apply -n ${CONTROL_PLANE_PROJECT_NAME} -f- <<EOF
+oc apply -f- <<EOF
 ########################################################################################################################
 # Create a ServiceMeshControlPlane resource
 ########################################################################################################################
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
-  name: ${SERVICE_MESH_CONTROL_PLANE_NAME}
+  name: basic
+  namespace: istio-system
 spec:
   version: v2.0
-  security:
-    controlPlane:
-      mtls: true  
   tracing:
     type: Jaeger
     sampling: 10000
@@ -171,18 +155,13 @@ spec:
     grafana:
       enabled: true
       name: grafana
----
-########################################################################################################################
-# Create a ServiceMeshMember resource
-########################################################################################################################
-apiVersion: maistra.io/v1
-kind: ServiceMeshMember
-metadata:
-  name: ${SERVICE_MESH_MEMBER_NAME}
-spec:
-  controlPlaneRef:
-    namespace: ${CONTROL_PLANE_PROJECT_NAME}
-    name: ${BOOKINFO_SERVICE_MESH_USER_NAME}
+    prometheus:
+      enabled: true
+  security:
+    controlPlane:
+      mtls: true
+    dataPlane:
+      mtls: true            
 ---
 ########################################################################################################################
 # Create a ServiceMeshMemberRoll resource
@@ -190,30 +169,18 @@ spec:
 apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
 metadata:
-  name: ${SERVICE_MESH_MEMBER_ROLL_NAME}
+  name: default
+  namespace: istio-system
 spec:
   members:
-    # a list of projects joined into the service mesh
-    - ${BOOKINFO_PROJECT_NAME}
----
-########################################################################################################################
-# Create the RoleBinding for the service mesh user
-########################################################################################################################
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  PROJECT: ${CONTROL_PLANE_PROJECT_NAME}
-  name: ${SERVICE_MESH_ROLE_BINDING_NAME}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: ${SERVICE_MESH_USER_ROLE_NAME}
-subjects:
-- apiGroup: rbac.authorization.k8s.io
-  kind: User
-  name: ${BOOKINFO_SERVICE_MESH_USER_NAME}
+    - bookinfo
 ---
 EOF
+```
+
+2. Get the control plane installation status using the following command:
+```bash
+oc get smcp -n istio-system
 ```
 
 ## Application Deployment
@@ -226,59 +193,43 @@ We are going to deploy the bookinfo application.
 1. Destination rules configure what happens to traffic for that destination after virtual service routing
    rules are evaluated. Apply `DestinationRule` to expose v1 destinations using the following command:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_DEST_RULES_ALL_URL}
+oc apply -n bookinfo -f ${BOOKINFO_DEST_RULES_ALL_URL}
 ```
 
 2. Think of virtual services as how traffic is routed to a given destination. Each virtual service consists of a set 
    of routing rules that are evaluated in order. So to route all traffic to subset, `v1`, only use the following command:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_VIRTUAL_SERVICE_V1_URL}
+oc apply -n bookinfo -f ${BOOKINFO_VIRTUAL_SERVICE_V1_URL}
 ```
 
-3. Deploy subset `v1` Services, ServiceAccounts, and Deployments using the following commands
+3. Deploy the service using the following commands:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=reviews            # reviews Service
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=reviews            # reviews ServiceAccount
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=reviews,version=v1     # reviews-v1 Deployment
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=details            # details Service
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=details            # details ServiceAccount
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=details,version=v1     # details-v1 Deployment
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=productpage        # productpage Service
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=productpage        # productpage ServiceAccount
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=productpage,version=v1 # productpage-v1 Deployment
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l service=ratings            # ratings Service
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l account=ratings            # ratings ServiceAccount
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_APP_URL} -l app=ratings,version=v1     # ratings-v1 Deployment
+oc apply -n bookinfo -f ${BOOKINFO_APP_URL}
 ```
 
-6. Deploy the `Gateway` configuration using the following command:
+4. Deploy the `Gateway` configuration using the following command:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT_NAME} -f ${BOOKINFO_GATEWAY_URL}
+oc apply -n bookinfo -f ${BOOKINFO_GATEWAY_URL}
 ```
 
 ## Verify Deployment
 
 1. List the running `Pods` using the following command:
 ```bash
-oc get pods -n ${BOOKINFO_PROJECT_NAME}
+oc get pods -n bookinfo
 ```
 
 2. List the `Tools` routes using the following command:
 ```bash
-oc get route -n ${CONTROL_PLANE_PROJECT_NAME}
-```   
-
-3. Get the control plane installation status using the following command:
-```bash
-oc get smcp -n ${CONTROL_PLANE_PROJECT_NAME}
+oc get route -n istio-system
 ```
 
-4. Export the `Gateway` URL using the following command:
+3. Export the `Gateway` URL using the following command:
 ```bash
-export GATEWAY_URL=$(oc -n ${CONTROL_PLANE_PROJECT_NAME} get route istio-ingressgateway -o jsonpath='{.spec.host}')
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
 ```
 
-5. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser. 
+4. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser. 
 ```bash
 echo http://${GATEWAY_URL}/productpage
 ```
@@ -291,6 +242,11 @@ You should see that the traffic is routed to the v1 services.
 
 > Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.
 > - Reviewer2
+
+6. Send some traffic using the following commad:
+```bash
+for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
+```
 
 ## Walk-Through
 **Note** the walk through requires `Curl` and `Pipe Viewer` to be installed on your system.
@@ -341,41 +297,21 @@ When you are finished you can remove the resources that we installed.
 
 1. Remove `Bookinfo` project using the following command:
 ```bash
-oc delete project ${BOOKINFO_PROJECT_NAME}
+oc delete project bookinfo
 ```   
 
 2. Delete the `Control Plane Project` using the following command:
 ```bash
-oc delete project ${CONTROL_PLANE_PROJECT_NAME}
-```
-
-3. Delete the `Service Mesh User` using the following command:
-```bash
-oc delete user ${BOOKINFO_SERVICE_MESH_USER_NAME}
+oc delete project istio-system
 ```
 
 3. Unset environment variables using the following command:
 ```bash
 unset MAISTRA_BRANCH
-unset OPERATORS_PROJECT_NAME
-unset CONTROL_PLANE_PROJECT_NAME
 unset BOOKINFO_APP_URL
 unset BOOKINFO_DEST_RULES_ALL_URL
 unset BOOKINFO_GATEWAY_URL
-unset BOOKINFO_GATEWAY_NAME
-unset BOOKINFO_PROJECT_NAME
-unset BOOKINFO_SERVICE_MESH_USER_NAME
-unset BOOKINFO_VIRTUAL_SERVICE_NAME
 unset BOOKINFO_VIRTUAL_SERVICE_V1_URL
-unset SERVICE_MESH_CONTROL_PLANE_NAME
-unset SERVICE_MESH_ROLE_BINDING_NAME
-unset SERVICE_MESH_MEMBER_NAME
-unset SERVICE_MESH_SUBSCRIPTION_NAME
-unset SERVICE_MESH_USER_ROLE_NAME
-unset SERVICE_MESH_MEMBER_ROLL_NAME
-unset KIALI_SUBSCRIPTION_NAME
-unset JAEGER_SUBSCRIPTION_NAME
-unset ELASTIC_SEARCH_SUBSCRIPTION_NAME
 ```
 
 ## References
