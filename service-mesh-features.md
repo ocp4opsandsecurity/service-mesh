@@ -142,12 +142,21 @@ spec:
     - destination:
         host: reviews
         subset: v1
-      weight: 90
+      weight: 80
     - destination:
         host: reviews
         subset: v3
-      weight: 10
+      weight: 20
+---
 EOF
+```
+
+On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
+services with `80% No Stars` and `20% RED Stars`.
+
+4. Send some traffic using the following commad:
+```bash
+for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ```
 
 #### Header Based Routing
@@ -188,6 +197,7 @@ spec:
     - destination:
         host: reviews
         subset: v1
+---
 EOF
 ```
 
