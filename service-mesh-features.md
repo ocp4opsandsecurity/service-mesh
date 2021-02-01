@@ -85,7 +85,12 @@ EOF
 On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V2
 services with `BLACK Stars`.
 
-2. Deploy `reviews v3` virtual service until you see RED star reviews using the following commands:
+2. Send some traffic using the following commad:
+```bash
+for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
+```
+
+3. Deploy `reviews v3` virtual service until you see RED star reviews using the following commands:
 ```bash
 oc apply -f- <<EOF
 apiVersion: networking.istio.io/v1alpha3
@@ -107,6 +112,11 @@ EOF
 
 On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
 services with `RED Stars`.
+
+4. Send some traffic using the following commad:
+```bash
+for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
+```
 
 ### Load Balancing
 Round-robin is the default load balancing policy, where each service instance in the instance pool gets a request in turn.
