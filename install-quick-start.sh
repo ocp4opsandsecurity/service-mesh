@@ -3,7 +3,7 @@
 ########################
 # include the magic
 ########################
-. ./demo-magic.sh
+. ./demo-magic.sh -n
 
 
 ########################
@@ -13,7 +13,7 @@
 #
 # speed at which to simulate typing. bigger num = faster
 #
-TYPE_SPEED=100
+TYPE_SPEED=400
 
 #
 # custom prompt
@@ -29,7 +29,8 @@ DEMO_CMD_COLOR=$BLACK
 # hide the evidence
 clear
 
+
 ########################
 # include the install
 ########################
-. ./service-mesh-install.sh
+. ./install.sh

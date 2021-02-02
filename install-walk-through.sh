@@ -3,7 +3,8 @@
 ########################
 # include the magic
 ########################
-. ./demo-magic.sh -n
+. ./demo-magic.sh
+
 
 ########################
 # Configure the options
@@ -12,7 +13,7 @@
 #
 # speed at which to simulate typing. bigger num = faster
 #
-TYPE_SPEED=400
+TYPE_SPEED=100
 
 #
 # custom prompt
@@ -28,10 +29,7 @@ DEMO_CMD_COLOR=$BLACK
 # hide the evidence
 clear
 
-pe "oc delete project ${BOOKINFO_PROJECT_NAME}"
-pe "oc delete project ${CONTROL_PLANE_PROJECT_NAME}"
-
 ########################
 # include the install
 ########################
-pe "sh ./service-mesh-unset.sh"
+. ./install.sh

@@ -1,0 +1,62 @@
+########################################################################################################################
+# Red Hat Elasticsearch, based on the open source Elasticsearch project.
+########################################################################################################################
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: elasticsearch-operator
+  namespace: openshift-operators-redhat
+spec:
+  channel: '4.6'
+  installPlanApproval: Automatic
+  name: elasticsearch-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+########################################################################################################################
+# Red Hat Jaeger Operator, based on the open source Jaeger project, lets you perform tracing to monitor and
+# troubleshoot transactions.
+########################################################################################################################
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: jaeger-product
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: jaeger-product
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+########################################################################################################################
+# Red Hat Kiali Operator - based on the open source Kiali project, provides observability for your service mesh. By
+# using Kiali you can view configurations, monitor traffic, and view and analyze traces in a single console.
+########################################################################################################################
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: kiali-ossm
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: kiali-ossm
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
+########################################################################################################################
+# Red Hat Service Mesh, based on the Maistra/istio project provide a platform to network and secure applications.
+########################################################################################################################
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: servicemeshoperator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: servicemeshoperator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+---
