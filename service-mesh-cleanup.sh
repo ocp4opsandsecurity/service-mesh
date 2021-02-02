@@ -34,4 +34,4 @@ pe "oc delete project ${CONTROL_PLANE_PROJECT_NAME}"
 ########################
 # include the install
 ########################
-. ./service-mesh-unset.sh
+pe "sh ./service-mesh-unset.sh"
