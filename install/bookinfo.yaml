@@ -17,13 +17,13 @@
 #
 # To apply all 4 Bookinfo services, their corresponding service accounts, and deployments:
 #
-#   oc apply -f ./install-bookinfo.yaml
+#   oc apply -f ./bookinfo.yaml
 #
 # Alternatively, you can deploy any resource separately:
 #
-#   oc apply -f ./install-bookinfo.yaml -l service=reviews # reviews Service
-#   oc apply -f ./install-bookinfo.yaml -l account=reviews # reviews ServiceAccount
-#   oc apply -f ./install-bookinfo.yaml -l app=reviews,version=v3 # reviews-v3 Deployment
+#   oc apply -f ./bookinfo.yaml -l service=reviews # reviews Service
+#   oc apply -f ./bookinfo.yaml -l account=reviews # reviews ServiceAccount
+#   oc apply -f ./bookinfo.yaml -l app=reviews,version=v3 # reviews-v3 Deployment
 ##################################################################################################
 
 ##################################################################################################

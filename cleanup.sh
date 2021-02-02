@@ -3,7 +3,7 @@
 ########################
 # include the magic
 ########################
-. ./demo-magic.sh -n
+. ./service-mesh/demo-magic.sh -n
 
 ########################
 # Configure the options

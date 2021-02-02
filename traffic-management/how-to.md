@@ -28,15 +28,10 @@ There are three versions of the reviews microservice:
 git clone https://github.com/ocp4opsandsecurity/service-mesh.git
 ```
 
-2. Make the `service-mesh` directory your current directory using the following command:
-```bash
-cd service-mesh
-```   
-
-3. Red Hat OpenShift Service Mesh is installed and configured using the [Quick-Start](#quick-start) or the procedure as 
-described in the [Service Mesh Install](../install/how-to-install.md) how-to.
+2. Red Hat OpenShift Service Mesh is installed and configured using the [Quick-Start](#quick-start) or the procedure as 
+described in the [Service Mesh Install](../install/how-to.md) how-to.
    
-4. **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
+3. **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
 
 ## Verify Deployment
 
@@ -76,7 +71,7 @@ Request routing by defaults routes traffic to all available service versions in 
 
 1. Deploy `Reviews v2` virtual service using the following commands:
 ```bash
-oc apply -f ./traffic-management/virtual-service-reviews-v2.yaml
+oc apply -f ./service-mesh/traffic-management/virtual-service-reviews-v2.yaml
 ```
 
 On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V2
@@ -89,7 +84,7 @@ for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 
 3. Deploy `reviews v3` virtual service until you see RED star reviews using the following commands:
 ```bash
-oc apply -f ./traffic-management/virtual-service-reviews-v3.yaml
+oc apply -f ./service-mesh/traffic-management/virtual-service-reviews-v3.yaml
 ```
 
 On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
@@ -110,7 +105,7 @@ Supported load balancing policy models:
 
 1. **Weighted** example routes the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
 ```bash
-oc apply -f ./traffic-management/weighted-v1-80-v3-20.yaml
+oc apply -f ./service-mesh/traffic-management/weighted-v1-80-v3-20.yaml
 ```
 
 On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
@@ -129,7 +124,7 @@ a custom end-user header to all outbound HTTP requests to the reviews service.
 
 1. Deploy the reviews `VirtualService` that matches on `Bill` or `Fred` using the following command:
 ```bash
-oc apply -f ./traffic-management/headers-bill-fred.yaml
+oc apply -f ./service-mesh/traffic-management/headers-bill-fred.yaml
 ```
 
 2. On the /productpage of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
@@ -147,7 +142,7 @@ application.
 
 1. Execute the walk-through using the following command:
 ```bash
-sh ./traffic-management/walk-through.sh
+sh ./service-mesh/traffic-management/walk-through.sh
 ```
 
 ## Quick-Start
@@ -156,7 +151,7 @@ explore the tools and get right to it.
 
 1. Execute the quick-start using the following command:
 ```bash
-sh ./install/quick-start.sh
+sh ./service-mesh/install/quick-start.sh
 ```
 
 ## References
