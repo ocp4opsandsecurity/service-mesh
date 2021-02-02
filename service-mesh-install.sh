@@ -1,7 +1,7 @@
 ##########################
 # include dependencies
 ##########################
-. ./service-mesh-export.sh
+pe "sh service-mesh-export.sh"
 
 p "Installing the Red Hat Operators"
 pe "oc apply -f- <<EOF

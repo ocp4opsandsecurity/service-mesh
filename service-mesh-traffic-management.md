@@ -243,18 +243,14 @@ explore the tools and get right to it.
 ```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
-```
-
-2. Download the quick-start script using the following command:
-```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-quick-start.sh \
      --output service-mesh-quick-start.sh
-```
-
-3. Download the install script using the following command:
-```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-install.sh \
      --output service-mesh-install.sh
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-export.sh \
+     --output service-mesh-export.sh
+curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-unset.sh \
+     --output service-mesh-unset.sh
 ```
 
 4. Execute the quick-start using the following command:
