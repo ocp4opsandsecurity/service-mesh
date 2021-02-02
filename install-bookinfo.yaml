@@ -17,13 +17,13 @@
 #
 # To apply all 4 Bookinfo services, their corresponding service accounts, and deployments:
 #
-#   kubectl apply -f samples/bookinfo/platform/kube/example-bookinfo.yaml
+#   kubectl apply -f samples/bookinfo/platform/kube/install-bookinfo.yaml
 #
 # Alternatively, you can deploy any resource separately:
 #
-#   kubectl apply -f samples/bookinfo/platform/kube/example-bookinfo.yaml -l service=reviews # reviews Service
-#   kubectl apply -f samples/bookinfo/platform/kube/example-bookinfo.yaml -l account=reviews # reviews ServiceAccount
-#   kubectl apply -f samples/bookinfo/platform/kube/example-bookinfo.yaml -l app=reviews,version=v3 # reviews-v3 Deployment
+#   kubectl apply -f samples/bookinfo/platform/kube/install-bookinfo.yaml -l service=reviews # reviews Service
+#   kubectl apply -f samples/bookinfo/platform/kube/install-bookinfo.yaml -l account=reviews # reviews ServiceAccount
+#   kubectl apply -f samples/bookinfo/platform/kube/install-bookinfo.yaml -l app=reviews,version=v3 # reviews-v3 Deployment
 ##################################################################################################
 
 ##################################################################################################
