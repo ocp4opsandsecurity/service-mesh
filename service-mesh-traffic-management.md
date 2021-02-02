@@ -225,12 +225,12 @@ curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo
 2. Download the walk-through script using the following command:
 ```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-walk-through.sh \
-     --output service-mesh-features-walk-through.sh
+     --output service-mesh-traffic-management-walk-through.sh
 ```
 
 3. Execute the walk-through using the following command:
 ```bash
-sh ./service-mesh-features-walk-through.sh
+sh ./service-mesh-traffic-management-walk-through.sh
 ```
 
 ## Quick-Start
