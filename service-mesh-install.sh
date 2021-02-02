@@ -92,11 +92,6 @@ spec:
       name: grafana
     prometheus:
       enabled: true
-  security:
-    controlPlane:
-      mtls: true
-    dataPlane:
-      mtls: true
 ---
 apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
