@@ -315,17 +315,9 @@ unset BOOKINFO_VIRTUAL_SERVICE_V1_URL
 ```
 
 ## References
-
-### Operator API
 - [Subscription](https://docs.openshift.com/container-platform/4.6/rest_api/operatorhub_apis/subscription-operators-coreos-com-v1alpha1.html)
-
-### Red Hat OpenShift
 - [Red Hat OpenShift Command Line Tools](https://docs.openshift.com/container-platform/4.6/cli_reference/openshift_cli/getting-started-cli.html#cli-about-cli_cli-developer-commands)
 - [Red Hat Service Mesh](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.6/html-single/service_mesh/index)
-
-### Upstream Projects
-- [Istio Release 1.6.14](https://istio.io/latest/news/releases/1.6.x/announcing-1.6.14/) 
-
-### Trouble Shooting
+- [Istio Release 1.6.14](https://istio.io/latest/news/releases/1.6.x/announcing-1.6.14/)
 - [Unable To Delete PROJECT](https://access.redhat.com/solutions/4165791)
 
