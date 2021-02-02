@@ -8,7 +8,7 @@
 | [bookinfo.yaml](install/bookinfo.yaml)| Bookinfo application configuration|
 | [bookinfo-gateway.yaml](install/bookinfo-gateway.yaml)| Bookinfo gateway configuration|
 | [control-plane.yaml](install/control-plane.yaml)| Service mesh control plane configuration|
-| [destination-rule-all-mtls.yaml](install/destination-rule-mtls.yaml)| Destination rules|
+| [destination-rule-all-mtls.yaml](install/destination-rule-all-mtls.yaml)| Destination rules|
 | [quick-start.sh](install/quick-start.sh) | A nonblocking script that execute [install.sh](install/install.sh) |
 | [subscription.yaml](install/subscription.yaml)| Operator subscription configurations|
 | [virtual-service-all-v1.yaml](install/virtual-service-all-v1.yaml)| V1 virtual service configurations|
