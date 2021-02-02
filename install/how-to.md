@@ -40,7 +40,7 @@ git clone https://github.com/ocp4opsandsecurity/service-mesh.git
 ## Red Hat Operators
 1. Install the operators needed to deploy the service mesh using the following command:
 ```bash
-oc apply -f ./service-mesh/install//subscription.yaml
+oc apply -f ./service-mesh/install/subscription.yaml
 ```
 
 ## Create Projects
@@ -60,7 +60,7 @@ We need configure our control plane which will act as the central controller for
 1. Create `ServiceMeshControlPlane`, `ServiceMeshMember`, `ServiceMeshMemberRoll`, and `RoleBindings` resources 
    using the following command:
 ```bash
-oc apply -f ./service-mesh/install//control-plane.yaml
+oc apply -f ./service-mesh/install/control-plane.yaml
 ```
 
 2. Get the control plane installation status using the following command:
@@ -78,23 +78,23 @@ We are going to deploy the bookinfo application.
 1. Destination rules configure what happens to traffic for that destination after virtual service routing
    rules are evaluated. Apply `DestinationRule` to expose v1 destinations using the following command:
 ```bash
-oc apply -n bookinfo -f ./service-mesh/install//destination-rule-all-mtls.yaml
+oc apply -n bookinfo -f ./service-mesh/install/destination-rule-all-mtls.yaml
 ```
 
 2. Think of virtual services as how traffic is routed to a given destination. Each virtual service consists of a set 
    of routing rules that are evaluated in order. So to route all traffic to subset, `v1`, only use the following command:
 ```bash
-oc apply -n bookinfo -f ./service-mesh/install//virtual-service-all-v1.yaml
+oc apply -n bookinfo -f ./service-mesh/install/virtual-service-all-v1.yaml
 ```
 
 3. Deploy the service using the following commands:
 ```bash
-oc apply -n bookinfo -f ./service-mesh/install//bookinfo.yaml
+oc apply -n bookinfo -f ./service-mesh/install/bookinfo.yaml
 ```
 
 4. Deploy the `Gateway` configuration using the following command:
 ```bash
-oc apply -n bookinfo -f ./service-mesh/install//bookinfo-gateway.yaml
+oc apply -n bookinfo -f ./service-mesh/install/bookinfo-gateway.yaml
 ```
 
 ## Verify Deployment
@@ -136,13 +136,13 @@ for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ## Walk-Through
 1. Execute the walk-through using the following command:
 ```bash
-sh ./service-mesh/install//walk-through.sh
+sh ./service-mesh/install/walk-through.sh
 ```
 
 ## Quick-Start
 1. Execute the quick-start using the following command:
 ```bash
-sh ./service-mesh/install//quick-start.sh
+sh ./service-mesh/install/quick-start.sh
 ```
 
 ## Cleanup
