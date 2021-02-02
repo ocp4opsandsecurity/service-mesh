@@ -26,15 +26,21 @@ reference application to allow us to test drive our deployment.
 2. Access to a user with cluster-admin permissions
 3. Access to an installed OpenShift Container Platform 4.6 deployment
 4. Access to an active OpenShift Container Platform 4.6 subscription
-5. Enable auto-completion using the following command 
+5. Enable auto-completion using the following command:
 ```bash
 source <(oc completion bash)
 ```
-6. Clone the service mesh project using the following command.
+6. Clone the service mesh project using the following command:
 ```bash
 git clone https://github.com/ocp4opsandsecurity/service-mesh.git
-cd service-mesh
 ```
+
+8. Make the `service-mesh` directory your current directory using the following command:
+```bash
+cd service-mesh
+```   
+
+9. **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
 
 ## Red Hat Operators
 1. Install the operators needed to deploy the service mesh using the following command:
@@ -133,40 +139,13 @@ for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ```
 
 ## Walk-Through
-**Note** the walk through requires `Curl` and `Pipe Viewer` to be installed on your system.
-
-1. Download walk-through scripts using the following commands:
-```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
-     --output demo-magic.sh
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install.sh \
-     --output install.sh
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install-walk-through.sh \
-     --output install-walk-through.sh
-```
-
-2. Execute the walk-through using the following command:
+1. Execute the walk-through using the following command:
 ```bash
 sh ./install-walk-through.sh
 ```
 
 ## Quick-Start
-Use this `quick-start` to install, deploy, and configure this how-to for Red Hat OpenShift Service Mesh so that your can
-explore the tools and get right to it.
-
-**Note** `Curl` and `Pipe Viewer` are to be installed on your system.
-
-1. Download walk-through scripts using the following commands:
-```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
-     --output demo-magic.sh
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install.sh \
-     --output install.sh
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-quick-start.sh \
-     --output install-quick-start.sh
-```
-
-2. Execute the quick-start using the following command:
+1. Execute the quick-start using the following command:
 ```bash
 sh ./install-quick-start.sh
 ```

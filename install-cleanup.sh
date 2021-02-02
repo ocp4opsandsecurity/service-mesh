@@ -31,7 +31,3 @@ clear
 pe "oc delete project ${BOOKINFO_PROJECT_NAME}"
 pe "oc delete project ${CONTROL_PLANE_PROJECT_NAME}"
 
-########################
-# include the install
-########################
-pe "sh ./service-mesh-unset.sh"

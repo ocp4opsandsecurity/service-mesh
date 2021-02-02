@@ -1,10 +1,5 @@
-##########################
-# include dependencies
-##########################
-pe "sh ./service-mesh-export.sh"
-
 p "Installing the Red Hat Operators"
-pe "oc apply -f ./service-mesh-subscription.yaml"
+pe "oc apply -f ./install-subscription.yaml"
 pe ""
 clear
 
@@ -19,7 +14,7 @@ pe ""
 clear
 
 p "Create Control Plane Project"
-pe "oc apply -f control-plane.yaml"
+pe "oc apply -f ./install-control-plane.yaml"
 pe ""
 clear
 
@@ -29,22 +24,22 @@ pe ""
 clear
 
 p "DestinationRules Deployment"
-pe "oc apply -n bookinfo -f ./service-mesh-destination-rule-all-mtls.yaml"
+pe "oc apply -n bookinfo -f ./install-destination-rule-all-mtls.yaml"
 pe ""
 clear
 
 p "Virtual Services"
-pe "oc apply -n bookinfo -f ./service-mesh-virtual-service-all-v1.yaml"
+pe "oc apply -n bookinfo -f ./install-virtual-service-all-v1.yaml"
 pe ""
 clear
 
 p "Create Services, ServiceAccounts, and Deployments"
-pe "oc apply -n bookinfo -f ./service-mesh-bookinfo.yaml"
+pe "oc apply -n bookinfo -f ./install-bookinfo.yaml"
 pe ""
 clear
 
 p "Deploy Gateway"
-pe "oc apply -n bookinfo -f ./service-mesh-bookinfo-gateway.yaml"
+pe "oc apply -n bookinfo -f ./install-bookinfo-gateway.yaml"
 pe ""
 clear
 

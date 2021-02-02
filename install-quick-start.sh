@@ -33,4 +33,4 @@ clear
 ########################
 # include the install
 ########################
-. ./service-mesh-install.sh
+. ./install.sh

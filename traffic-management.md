@@ -26,12 +26,18 @@ There are three versions of the reviews microservice:
 1. Clone the service mesh project using the following command.
 ```bash
 git clone https://github.com/ocp4opsandsecurity/service-mesh.git
+```
+
+2. Make the `service-mesh` directory your current directory using the following command:
+```bash
 cd service-mesh
 ```   
 
-2. Red Hat OpenShift Service Mesh is installed and configured using the [Quick-Start](#quick-start) or the procedure as 
+3. Red Hat OpenShift Service Mesh is installed and configured using the [Quick-Start](#quick-start) or the procedure as 
 described in the [Service Mesh Install](install.md) how-to.
-  
+   
+4. **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
+
 ## Verify Deployment
 
 1. List the running `Pods` using the following command:
@@ -89,7 +95,7 @@ oc apply -f ./traffic-management-virtual-service-reviews-v3.yaml
 On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
 services with `RED Stars`.
 
-4. Send some traffic using the following commad:
+4. Send some traffic using the following command:
 ```bash
 for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ```
@@ -139,21 +145,7 @@ traffic is routed to reviews:v1 for all users except Bill and Fred.
 Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference 
 application. 
 
-> **Note** `Curl` and `Pipe Viewer` are to be installed on your system.
-
-1. Download demo-magic script using the following commands:
-```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
-     --output demo-magic.sh
-```
-
-2. Download the walk-through script using the following command:
-```bash
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-features-walk-through.sh \
-     --output traffic-management-walk-through.sh
-```
-
-3. Execute the walk-through using the following command:
+1. Execute the walk-through using the following command:
 ```bash
 sh ./traffic-management-walk-through.sh
 ```
@@ -161,8 +153,6 @@ sh ./traffic-management-walk-through.sh
 ## Quick-Start
 Use this `quick-start` to install, deploy, and configure this how-to for Red Hat OpenShift Service Mesh so that your can
 explore the tools and get right to it.
-
-**Note** `Curl` and `Pipe Viewer` are to be installed on your system.
 
 1. Execute the quick-start using the following command:
 ```bash

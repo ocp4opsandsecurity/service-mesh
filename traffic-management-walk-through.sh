@@ -29,128 +29,43 @@ DEMO_CMD_COLOR=$BLACK
 # hide the evidence
 clear
 
-p "Deploy reviews v2 virtual service (check for black Stars)"
-pe "oc apply -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: reviews
-  namespace: bookinfo
-spec:
-  hosts:
-  - reviews
-  http:
-  - route:
-    - destination:
-        host: reviews
-        subset: v2
----
-EOF"
+p "List the running pods"
+pe "oc get pods -n bookinfo"
 pe ""
 clear
 
-p "Deploy reviews v3 (check for RED Stars)"
-pe "oc apply -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: reviews
-  namespace: bookinfo
-spec:
-  hosts:
-  - reviews
-  http:
-  - route:
-    - destination:
-        host: reviews
-        subset: v3
----
-EOF"
+p "List the routest to the tools"
+pe "oc get route -n istio-system"
+pe ""
+clear
+
+p "Set gateway url"
+pe "export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')"
+pe ""
+clear
+
+p "Print gateway url to the screen"
+pe "echo http://${GATEWAY_URL}/productpage"
+pe ""
+clear
+
+p "Deploy reviews v2 virtual service (Black Stars)"
+pe "ococ apply -f ./traffic-management-virtual-service-reviews-v2.yaml"
+pe ""
+clear
+
+p "Deploy reviews v3 virtual service (Red Stars)"
+pe "ococ apply -f ./traffic-management-virtual-service-reviews-v3.yaml"
 pe ""
 clear
 
 p "Weighted Load Balancing"
-pe "oc apply -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: reviews
-  namespace: bookinfo
-spec:
-  hosts:
-    - reviews
-  http:
-  - route:
-    - destination:
-        host: reviews
-        subset: v1
-      weight: 80
-    - destination:
-        host: reviews
-        subset: v3
-      weight: 20
----
-EOF"
+pe "oc apply -f ./traffic-management-weighted-v1-80-v3-20.yaml"
 pe ""
 clear
 
-p "Load Balancing: weighted"
-pe "oc apply -f- <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: reviews
-  namespace: bookinfo
-spec:
-  hosts:
-    - reviews
-  http:
-  - route:
-    - destination:
-        host: reviews
-        subset: v1
-      weight: 80
-    - destination:
-        host: reviews
-        subset: v3
-      weight: 20
----
-EOF"
-pe ""
-clear
 
 p "Header Routing"
-pe "oc apply -f- <<EOF
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: reviews
-  namespace: bookinfo
-spec:
-  hosts:
-  - reviews
-  http:
-  - match:
-    - headers:
-        end-user:
-          exact: Bill
-    route:
-    - destination:
-        host: reviews
-        subset: v2
-  - match:
-    - headers:
-        end-user:
-          exact: Fred
-    route:
-    - destination:
-        host: reviews
-        subset: v3
-  - route:
-    - destination:
-        host: reviews
-        subset: v1
----
-EOF"
+pe "oc apply -f ./traffic-management-headers-bill-fred.yaml"
 pe ""
 clear
