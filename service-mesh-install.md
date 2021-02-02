@@ -1,7 +1,7 @@
 # service-mesh-install
 How to install Red Hat OpenShift Service Mesh based on Istio version 1.6.14 on Red Hat OpenShift version 4.6. To 
 install the Red Hat OpenShift Service Mesh Operator, you must first install the Elasticsearch, Jaeger, and Kaili 
-Operators in the service mesh control plane PROJECT. For this exercise we will also be deploying the upstream bookinfo 
+Operators in the service mesh control plane project. For this exercise we will also be deploying the upstream bookinfo 
 reference application to allow us to test drive our deployment. 
 
 > Use the [Walk-Through](#walk-through) if you want to automate the entering of the commands.
@@ -36,11 +36,7 @@ To configure the environment we need to set variables for our projects and servi
 
 1. Set the environment variables using the following command:
 ```bash
-export MAISTRA_BRANCH=maistra-2.0
-export BOOKINFO_APP_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/platform/kube/bookinfo.yaml
-export BOOKINFO_DEST_RULES_ALL_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/networking/destination-rule-all.yaml
-export BOOKINFO_GATEWAY_URL=https://raw.githubusercontent.com/Maistra/istio/${MAISTRA_BRANCH}/samples/bookinfo/networking/bookinfo-gateway.yaml
-export BOOKINFO_VIRTUAL_SERVICE_V1_URL=https://github.com/maistra/istio/raw/${MAISTRA_BRANCH}/samples/bookinfo/networking/virtual-service-all-v1.yaml
+sh service-mesh-export.sh
 ```
 
 ## Red Hat Operators
@@ -115,12 +111,12 @@ EOF
 ## Create Projects
 1. Create a project for the `Control Plane` using the following commands:
 ```bash
-oc new-project istio-system
+oc new-project ${CONTROL_PROJECT}
 ```
 
 2. Create a project for the applications using the following commands:
 ```bash
-oc new-project bookinfo
+oc new-project ${BOOKINFO_PROJECT}
 ```
 
 ## Control Plane Deployment
@@ -137,7 +133,7 @@ apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
   name: basic
-  namespace: istio-system
+  namespace: ${CONTROL_PROJECT}
 spec:
   version: v2.0
   tracing:
@@ -165,17 +161,17 @@ apiVersion: maistra.io/v1
 kind: ServiceMeshMemberRoll
 metadata:
   name: default
-  namespace: istio-system
+  namespace: ${CONTROL_PROJECT}
 spec:
   members:
-    - bookinfo
+    - ${BOOKINFO_PROJECT}
 ---
 EOF
 ```
 
 2. Get the control plane installation status using the following command:
 ```bash
-oc get smcp -n istio-system
+oc get smcp -n ${CONTROL_PROJECT}
 ```
 
 ## Application Deployment
@@ -188,40 +184,40 @@ We are going to deploy the bookinfo application.
 1. Destination rules configure what happens to traffic for that destination after virtual service routing
    rules are evaluated. Apply `DestinationRule` to expose v1 destinations using the following command:
 ```bash
-oc apply -n bookinfo -f ${BOOKINFO_DEST_RULES_ALL_URL}
+oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_DEST_RULES_ALL_URL}
 ```
 
 2. Think of virtual services as how traffic is routed to a given destination. Each virtual service consists of a set 
    of routing rules that are evaluated in order. So to route all traffic to subset, `v1`, only use the following command:
 ```bash
-oc apply -n bookinfo -f ${BOOKINFO_VIRTUAL_SERVICE_V1_URL}
+oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_VIRTUAL_SERVICE_V1_URL}
 ```
 
 3. Deploy the service using the following commands:
 ```bash
-oc apply -n bookinfo -f ${BOOKINFO_APP_URL}
+oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_APP_URL}
 ```
 
 4. Deploy the `Gateway` configuration using the following command:
 ```bash
-oc apply -n bookinfo -f ${BOOKINFO_GATEWAY_URL}
+oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_GATEWAY_URL}
 ```
 
 ## Verify Deployment
 
 1. List the running `Pods` using the following command:
 ```bash
-oc get pods -n bookinfo
+oc get pods -n ${BOOKINFO_PROJECT}
 ```
 
 2. List the `Tools` routes using the following command:
 ```bash
-oc get route -n istio-system
+oc get route -n ${CONTROL_PROJECT}
 ```
 
 3. Export the `Gateway` URL using the following command:
 ```bash
-export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
+export GATEWAY_URL=$(oc -n ${CONTROL_PROJECT} get route istio-ingressgateway -o jsonpath='{.spec.host}')
 ```
 
 4. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser. 
@@ -292,27 +288,14 @@ When you are finished you can remove the resources that we installed.
 
 1. Remove `Bookinfo` project using the following command:
 ```bash
-oc delete project bookinfo
-```   
-
-2. Delete the `Control Plane Project` using the following command:
-```bash
-oc delete project istio-system
+sh service-mesh-cleanup.sh
 ```
 
-3. Unset environment variables using the following command:
-```bash
-unset MAISTRA_BRANCH
-unset BOOKINFO_APP_URL
-unset BOOKINFO_DEST_RULES_ALL_URL
-unset BOOKINFO_GATEWAY_URL
-unset BOOKINFO_VIRTUAL_SERVICE_V1_URL
-```
 
 ## References
 - [Subscription](https://docs.openshift.com/container-platform/4.6/rest_api/operatorhub_apis/subscription-operators-coreos-com-v1alpha1.html)
 - [Red Hat OpenShift Command Line Tools](https://docs.openshift.com/container-platform/4.6/cli_reference/openshift_cli/getting-started-cli.html#cli-about-cli_cli-developer-commands)
 - [Red Hat Service Mesh](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.6/html-single/service_mesh/index)
 - [Istio Release 1.6.14](https://istio.io/latest/news/releases/1.6.x/announcing-1.6.14/)
-- [Unable To Delete PROJECT](https://access.redhat.com/solutions/4165791)
+- [Unable To Delete Project](https://access.redhat.com/solutions/4165791)
 
