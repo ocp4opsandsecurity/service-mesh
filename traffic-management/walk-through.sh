@@ -50,22 +50,22 @@ pe ""
 clear
 
 p "Deploy reviews v2 virtual service (Black Stars)"
-pe "ococ apply -f ./traffic-management-virtual-service-reviews-v2.yaml"
+pe "ococ apply -f ./traffic-management/virtual-service-reviews-v2.yaml"
 pe ""
 clear
 
 p "Deploy reviews v3 virtual service (Red Stars)"
-pe "ococ apply -f ./traffic-management-virtual-service-reviews-v3.yaml"
+pe "ococ apply -f ./traffic-management/virtual-service-reviews-v3.yaml"
 pe ""
 clear
 
 p "Weighted Load Balancing"
-pe "oc apply -f ./traffic-management-weighted-v1-80-v3-20.yaml"
+pe "oc apply -f ./traffic-management/weighted-v1-80-v3-20.yaml"
 pe ""
 clear
 
 
 p "Header Routing"
-pe "oc apply -f ./traffic-management-headers-bill-fred.yaml"
+pe "oc apply -f ./traffic-management/headers-bill-fred.yaml"
 pe ""
 clear
