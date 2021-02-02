@@ -4,55 +4,7 @@
 pe "sh ./service-mesh-export.sh"
 
 p "Installing the Red Hat Operators"
-pe "oc apply -f- <<EOF
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: elasticsearch-operator
-  namespace: openshift-operators-redhat
-spec:
-  channel: '4.6'
-  installPlanApproval: Automatic
-  name: elasticsearch-operator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: jaeger-product
-  namespace: openshift-operators
-spec:
-  channel: stable
-  installPlanApproval: Automatic
-  name: jaeger-product
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: kiali-ossm
-  namespace: openshift-operators
-spec:
-  channel: stable
-  installPlanApproval: Automatic
-  name: kiali-ossm
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: servicemeshoperator
-  namespace: openshift-operators
-spec:
-  channel: stable
-  installPlanApproval: Automatic
-  name: servicemeshoperator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
-EOF"
+pe "oc apply -f ./service-mesh-subscription.yaml"
 pe ""
 clear
 
@@ -67,43 +19,7 @@ pe ""
 clear
 
 p "Create Control Plane Project"
-pe "oc apply -f- <<EOF
-apiVersion: maistra.io/v2
-kind: ServiceMeshControlPlane
-metadata:
-  name: basic
-  namespace: istio-system
-spec:
-  version: v2.0
-  tracing:
-    type: Jaeger
-    sampling: 10000
-  addons:
-    jaeger:
-      name: jaeger
-      install:
-        storage:
-          type: Memory
-    kiali:
-      enabled: true
-      name: kiali
-    grafana:
-      enabled: true
-      name: grafana
-    prometheus:
-      enabled: true
----
-apiVersion: maistra.io/v1
-kind: ServiceMeshMemberRoll
-metadata:
-  name: default
-  namespace: istio-system
-spec:
-  members:
-    # a list of projects joined into the service mesh
-    - bookinfo
----
-EOF"
+pe "oc apply -f control-plane.yaml"
 pe ""
 clear
 
@@ -113,22 +29,22 @@ pe ""
 clear
 
 p "DestinationRules Deployment"
-pe "oc apply -n bookinfo -f ${BOOKINFO_DEST_RULES_ALL_URL}"
+pe "oc apply -n bookinfo -f ./service-mesh-destination-rule-all-mtls.yaml"
 pe ""
 clear
 
 p "Virtual Services"
-pe "oc apply -n bookinfo -f ${BOOKINFO_VIRTUAL_SERVICE_V1_URL}"
+pe "oc apply -n bookinfo -f ./service-mesh-virtual-service-all-v1.yaml"
 pe ""
 clear
 
 p "Create Services, ServiceAccounts, and Deployments"
-pe "oc apply -n bookinfo -f ${BOOKINFO_APP_URL}"
+pe "oc apply -n bookinfo -f ./service-mesh-bookinfo.yaml"
 pe ""
 clear
 
 p "Deploy Gateway"
-pe "oc apply -n bookinfo -f ${BOOKINFO_GATEWAY_URL}"
+pe "oc apply -n bookinfo -f ./service-mesh-bookinfo-gateway.yaml"
 pe ""
 clear
 

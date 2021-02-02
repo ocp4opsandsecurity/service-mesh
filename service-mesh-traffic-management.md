@@ -247,8 +247,6 @@ curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/serv
      --output service-mesh-quick-start.sh
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-install.sh \
      --output service-mesh-install.sh
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-export.sh \
-     --output service-mesh-export.sh
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/service-mesh-unset.sh \
      --output service-mesh-unset.sh
 ```

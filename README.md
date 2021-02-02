@@ -9,7 +9,7 @@
 ## Supporting Files
 | Name| Description | 
 | :--- | :---        |
-| [demo-magic.sh](demo-magic) | Utility for automating live demos by [paxtonhare](https://github.com/paxtonhare/demo-magic)|
+| [demo-magic.sh](demo-magic.sh) | Utility for automating live demos by [paxtonhare](https://github.com/paxtonhare/demo-magic)|
 | [service-mesh-cleanup.sh](service-mesh-cleanup.sh) | Remove resources |
 | [service-mesh-export.sh](service-mesh-export.sh) | Add environment variables |
 | [service-mesh-traffic-management-walk-through.sh](service-mesh-traffic-management-walk-through.sh) | Automated walk-through of Red Hat OpenShift Service Mesh traffic management features |

@@ -29,94 +29,23 @@ reference application to allow us to test drive our deployment.
 5. Enable auto-completion using the following command 
 ```bash
 source <(oc completion bash)
-``` 
-
-## Environment Variables
-To configure the environment we need to set variables for our projects and service mesh. 
-
-1. Set the environment variables using the following command:
-```bash
-sh service-mesh-export.sh
 ```
 
 ## Red Hat Operators
 1. Install the operators needed to deploy the service mesh using the following command:
 ```bash
-oc apply -f- <<EOF
-########################################################################################################################
-# Red Hat Elasticsearch, based on the open source Elasticsearch project.
-########################################################################################################################
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: elasticsearch-operator
-  namespace: openshift-operators-redhat
-spec:
-  channel: '4.6'
-  installPlanApproval: Automatic
-  name: elasticsearch-operator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-########################################################################################################################
-# Red Hat Jaeger Operator, based on the open source Jaeger project, lets you perform tracing to monitor and 
-# troubleshoot transactions.
-########################################################################################################################
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: jaeger-product
-  namespace: openshift-operators
-spec:
-  channel: stable
-  installPlanApproval: Automatic
-  name: jaeger-product
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-########################################################################################################################
-# Red Hat Kiali Operator - based on the open source Kiali project, provides observability for your service mesh. By 
-# using Kiali you can view configurations, monitor traffic, and view and analyze traces in a single console.
-########################################################################################################################
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: kiali-ossm
-  namespace: openshift-operators
-spec:
-  channel: stable
-  installPlanApproval: Automatic
-  name: kiali-ossm
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-########################################################################################################################
-# Red Hat Service Mesh, based on the Maistra/istio project provide a platform to network and secure applications.
-########################################################################################################################
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: servicemeshoperator
-  namespace: openshift-operators
-spec:
-  channel: stable
-  installPlanApproval: Automatic
-  name: servicemeshoperator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
----
-EOF
+oc apply -f ./example-subscription.yaml
 ```
 
 ## Create Projects
 1. Create a project for the `Control Plane` using the following commands:
 ```bash
-oc new-project ${CONTROL_PROJECT}
+oc new-project istio-system
 ```
 
 2. Create a project for the applications using the following commands:
 ```bash
-oc new-project ${BOOKINFO_PROJECT}
+oc new-project bookinfo
 ```
 
 ## Control Plane Deployment
@@ -125,53 +54,12 @@ We need configure our control plane which will act as the central controller for
 1. Create `ServiceMeshControlPlane`, `ServiceMeshMember`, `ServiceMeshMemberRoll`, and `RoleBindings` resources 
    using the following command:
 ```bash
-oc apply -f- <<EOF
-########################################################################################################################
-# Create a ServiceMeshControlPlane resource
-########################################################################################################################
-apiVersion: maistra.io/v2
-kind: ServiceMeshControlPlane
-metadata:
-  name: basic
-  namespace: ${CONTROL_PROJECT}
-spec:
-  version: v2.0
-  tracing:
-    type: Jaeger
-    sampling: 10000
-  addons:
-    jaeger:
-      name: jaeger
-      install:
-        storage:
-          type: Memory
-    kiali:
-      enabled: true
-      name: kiali
-    grafana:
-      enabled: true
-      name: grafana
-    prometheus:
-      enabled: true           
----
-########################################################################################################################
-# Create a ServiceMeshMemberRoll resource
-########################################################################################################################
-apiVersion: maistra.io/v1
-kind: ServiceMeshMemberRoll
-metadata:
-  name: default
-  namespace: ${CONTROL_PROJECT}
-spec:
-  members:
-    - ${BOOKINFO_PROJECT}
----
-EOF
+oc apply -f ./example-control-plane.yaml
 ```
 
 2. Get the control plane installation status using the following command:
 ```bash
-oc get smcp -n ${CONTROL_PROJECT}
+oc get smcp -n istio-system
 ```
 
 ## Application Deployment
@@ -184,40 +72,40 @@ We are going to deploy the bookinfo application.
 1. Destination rules configure what happens to traffic for that destination after virtual service routing
    rules are evaluated. Apply `DestinationRule` to expose v1 destinations using the following command:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_DEST_RULES_ALL_URL}
+oc apply -n bookinfo -f ./example-destination-rule-all-mtls.yaml
 ```
 
 2. Think of virtual services as how traffic is routed to a given destination. Each virtual service consists of a set 
    of routing rules that are evaluated in order. So to route all traffic to subset, `v1`, only use the following command:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_VIRTUAL_SERVICE_V1_URL}
+oc apply -n bookinfo -f ./service-mesh-virtual-service-all-v1.yaml
 ```
 
 3. Deploy the service using the following commands:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_APP_URL}
+oc apply -n bookinfo -f ./example-bookinfo.yaml
 ```
 
 4. Deploy the `Gateway` configuration using the following command:
 ```bash
-oc apply -n ${BOOKINFO_PROJECT} -f ${BOOKINFO_GATEWAY_URL}
+oc apply -n bookinfo -f ./example-bookinfo-gateway.yaml
 ```
 
 ## Verify Deployment
 
 1. List the running `Pods` using the following command:
 ```bash
-oc get pods -n ${BOOKINFO_PROJECT}
+oc get pods -n bookinfo
 ```
 
 2. List the `Tools` routes using the following command:
 ```bash
-oc get route -n ${CONTROL_PROJECT}
+oc get route -n istio-system
 ```
 
 3. Export the `Gateway` URL using the following command:
 ```bash
-export GATEWAY_URL=$(oc -n ${CONTROL_PROJECT} get route istio-ingressgateway -o jsonpath='{.spec.host}')
+export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
 ```
 
 4. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser. 
@@ -246,8 +134,6 @@ for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-export.sh \
-     --output service-mesh-export.sh
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install.sh \
      --output service-mesh-install.sh
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install-walk-through.sh \
@@ -269,8 +155,6 @@ explore the tools and get right to it.
 ```bash
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh/main/demo-magic.sh \
      --output demo-magic.sh
-curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-export.sh \
-     --output service-mesh-export.sh
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-install.sh \
      --output service-mesh-install.sh
 curl https://raw.githubusercontent.com/ocp4opsandsecurity/service-mesh-install/main/service-mesh-quick-start.sh \
@@ -288,7 +172,7 @@ When you are finished you can remove the resources that we installed.
 
 1. Remove `Bookinfo` project using the following command:
 ```bash
-sh service-mesh-cleanup.sh
+source ./service-mesh-cleanup.sh
 ```
 
 
