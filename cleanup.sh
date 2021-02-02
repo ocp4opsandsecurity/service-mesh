@@ -5,6 +5,7 @@
 ########################
 . ./service-mesh/demo-magic.sh -n
 
+
 ########################
 # Configure the options
 ########################

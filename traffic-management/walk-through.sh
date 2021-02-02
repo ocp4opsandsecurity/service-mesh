@@ -6,6 +6,7 @@
 . ./service-mesh/demo-magic.sh
 
 
+
 ########################
 # Configure the options
 ########################
@@ -62,7 +63,6 @@ p "Weighted Load Balancing"
 pe "oc apply -f ./service-mesh/traffic-management/weighted-v1-80-v3-20.yaml"
 pe ""
 clear
-
 
 p "Header Routing"
 pe "oc apply -f ./service-mesh/traffic-management/headers-bill-fred.yaml"
