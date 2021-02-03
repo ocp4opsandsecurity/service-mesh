@@ -3,7 +3,7 @@
 ########################
 # include the magic
 ########################
-. ./service-mesh/demo-magic.sh
+. ./demo-magic.sh
 
 
 ########################
@@ -32,4 +32,4 @@ clear
 ########################
 # include the install
 ########################
-. ./service-mesh/install/install.sh
+. ./install/install.sh

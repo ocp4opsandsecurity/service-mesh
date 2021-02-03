@@ -3,7 +3,7 @@
 ########################
 # include the magic
 ########################
-. ./service-mesh/demo-magic.sh -n
+. ./demo-magic.sh -n
 
 
 ########################
@@ -29,6 +29,6 @@ DEMO_CMD_COLOR=$BLACK
 # hide the evidence
 clear
 
-pe "oc delete project ${BOOKINFO_PROJECT_NAME}"
-pe "oc delete project ${CONTROL_PLANE_PROJECT_NAME}"
+pe "oc delete project bookinfo"
+pe "oc delete project istio-system"
 
