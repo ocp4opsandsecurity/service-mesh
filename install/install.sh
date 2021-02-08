@@ -24,7 +24,7 @@ pe ""
 clear
 
 p "DestinationRules Deployment"
-pe "oc apply -n bookinfo -f ./install/destination-rule-all-mtls.yaml"
+pe "oc apply -n bookinfo -f ./install/destination-rule-all.yaml"
 pe ""
 clear
 
