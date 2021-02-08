@@ -55,7 +55,7 @@ oc get route -n istio-system
 export GATEWAY_URL=$(oc -n istio-system get route istio-ingressgateway -o jsonpath='{.spec.host}')
 ```
 
-4. On the http://${GATEWAY_URL}/productpage of the Bookinfo application, refresh the browser.
+4. On the **http://${GATEWAY_URL}/productpage** of the Bookinfo application, refresh the browser.
 ```bash
 echo http://${GATEWAY_URL}/productpage
 ```
@@ -79,7 +79,7 @@ Request routing by defaults routes traffic to all available service versions in 
 oc apply -f ./traffic-management/virtual-service-reviews-v2.yaml
 ```
 
-On the */productpage* of the bookinfo application, refresh the browser. You should see that traffic is routed to the V2
+On the **/productpage** of the bookinfo application, refresh the browser. You should see that traffic is routed to the V2
 services with `BLACK Stars`.
 
 2. Send some traffic using the following command:
@@ -92,7 +92,7 @@ for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 oc apply -f ./traffic-management/virtual-service-reviews-v3.yaml
 ```
 
-On the */productpage* of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
+On the **/productpage** of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
 services with `RED Stars`.
 
 4. Send some traffic using the following command:
@@ -113,7 +113,7 @@ Supported load balancing policy models:
 oc apply -f ./traffic-management/weighted-v1-80-v3-20.yaml
 ```
 
-On the */productpage* of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
+On the **/productpage** of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
 services with `80% No Stars` and `20% RED Stars`.
 
 4. Send some traffic using the following command:
@@ -132,10 +132,10 @@ a custom end-user header to all outbound HTTP requests to the _reviews_ service.
 oc apply -f ./traffic-management/headers-bill-fred.yaml
 ```
 
-2. On the */productpage* of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
+2. On the **/productpage** of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
 The BLACK star ratings appear next to each review.
 
-3. On the */productpage* of the Bookinfo application, log in as user `Fred`. Refresh the browser. What do you see?
+3. On the **/productpage** of the Bookinfo application, log in as user `Fred`. Refresh the browser. What do you see?
 The RED star ratings appear next to each review.
 
 4. Log in as another user (pick any name you wish). Refresh the browser; notice the stars are gone! This is because 
