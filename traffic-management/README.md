@@ -108,17 +108,17 @@ Supported load balancing policy models:
 - **Weighted:** Requests are forwarded in the pool according to a specific percentage.
 - **Least requests:** Requests are forwarded to the instances with the least number of requests.
 
-1. **Weighted** example routes the bulk of the review traffic to version `v2` with the balance routed to `v3` using the following command:
+1. **Weighted** example routes the bulk of the review traffic to version `v1` with the balance routed to `v3` using the following command:
 ```bash
-oc apply -f ./traffic-management/weighted-v1-80-v3-20.yaml
+oc apply -f ./traffic-management/weighted-v1-99-v3-1.yaml
 ```
 
-On the **/productpage** of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
-services with `80% No Stars` and `20% RED Stars`.
+On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
+services with `99% No Stars` and `1% RED Stars`.
 
 4. Send some traffic using the following command:
 ```bash
-for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
+for i in {1..1000}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ```
 
 #### Header Based Routing
