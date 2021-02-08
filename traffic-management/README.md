@@ -1,18 +1,18 @@
 # service-mesh-features
-How to that explores many of the powerful Service Mesh features covered in the Istio BookInfo reference application.
+This exercise explores many of the powerful Service Mesh features covered in the Istio BookInfo reference application.
 
 The Bookinfo application consists of these microservices:
 
-- The productpage microservice calls the details and reviews microservices to populate the page.
-- The details microservice contains book information.
-- The reviews microservice contains book reviews. It also calls the ratings microservice.
-- The ratings microservice contains book ranking information that accompanies a book review.
+- The _productpage_ microservice calls the details and reviews microservices to populate the page.
+- The _details_ microservice contains book information.
+- The _reviews_ microservice contains book reviews. It also calls the ratings microservice.
+- The _ratings_ microservice contains book ranking information that accompanies a book review.
 
-There are three versions of the reviews microservice:
+There are three versions of the _reviews_ microservice:
 
-- Version v1 does not call the ratings Service.
-- Version v2 calls the ratings Service and displays each rating as one to five black stars.
-- Version v3 calls the ratings Service and displays each rating as one to five red stars.
+- Version v1 does not call the _ratings_ Service.
+- Version v2 calls the _ratings_ Service and displays each rating as one to five black stars.
+- Version v3 calls the _ratings_ Service and displays each rating as one to five red stars.
 
 > Use the [Quick-Start](#quick-start) to configure environment variables and the service mesh deployment.
 
@@ -79,7 +79,7 @@ Request routing by defaults routes traffic to all available service versions in 
 oc apply -f ./traffic-management/virtual-service-reviews-v2.yaml
 ```
 
-On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V2
+On the */productpage* of the bookinfo application, refresh the browser. You should see that traffic is routed to the V2
 services with `BLACK Stars`.
 
 2. Send some traffic using the following command:
@@ -92,7 +92,7 @@ for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 oc apply -f ./traffic-management/virtual-service-reviews-v3.yaml
 ```
 
-On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
+On the */productpage* of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3 
 services with `RED Stars`.
 
 4. Send some traffic using the following command:
@@ -113,10 +113,10 @@ Supported load balancing policy models:
 oc apply -f ./traffic-management/weighted-v1-80-v3-20.yaml
 ```
 
-On the /productpage of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
+On the */productpage* of the bookinfo application, refresh the browser. You should see that traffic is routed to the V3
 services with `80% No Stars` and `20% RED Stars`.
 
-4. Send some traffic using the following commad:
+4. Send some traffic using the following command:
 ```bash
 for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ```
@@ -124,22 +124,22 @@ for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 #### Header Based Routing
 We can change the route configuration so that all traffic from a specific user is routed to a specific service 
 version. In this case, all traffic from a user named `Bill` will be routed to the service reviews:v2 and from user named
-`Fred` will be routed to the service reviews:v1. This example is enabled by the fact that the productpage service adds 
-a custom end-user header to all outbound HTTP requests to the reviews service.
+`Fred` will be routed to the service _reviews:v1_. This example is enabled by the fact that the _productpage_ service adds 
+a custom end-user header to all outbound HTTP requests to the _reviews_ service.
 
-1. Deploy the reviews `VirtualService` that matches on `Bill` or `Fred` using the following command:
+1. Deploy the _reviews_ `VirtualService` that matches on `Bill` or `Fred` using the following command:
 ```bash
 oc apply -f ./traffic-management/headers-bill-fred.yaml
 ```
 
-2. On the /productpage of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
+2. On the */productpage* of the Bookinfo application, log in as user `Bill`. Refresh the browser. What do you see? 
 The BLACK star ratings appear next to each review.
 
-3. On the /productpage of the Bookinfo application, log in as user `Fred`. Refresh the browser. What do you see?
+3. On the */productpage* of the Bookinfo application, log in as user `Fred`. Refresh the browser. What do you see?
 The RED star ratings appear next to each review.
 
 4. Log in as another user (pick any name you wish). Refresh the browser; notice the stars are gone! This is because 
-traffic is routed to reviews:v1 for all users except Bill and Fred.
+traffic is routed to _reviews:v1_ for all users except Bill and Fred.
    
 ## Walk-Through
 Use this walk-through as an automated guide explore Red Hat Service Mesh features based on the Istio BookInfo reference 
