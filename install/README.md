@@ -83,7 +83,7 @@ We are going to deploy the bookinfo application.
 1. Destination rules configure what happens to traffic for that destination after virtual service routing
    rules are evaluated. Apply `DestinationRule` to expose v1 destinations using the following command:
 ```bash
-oc apply -n bookinfo -f ./install/destination-rule-all-mtls.yaml
+oc apply -n bookinfo -f ./install/destination-rule-all.yaml
 ```
 
 2. Think of virtual services as how traffic is routed to a given destination. Each virtual service consists of a set 
