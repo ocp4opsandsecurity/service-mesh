@@ -60,7 +60,7 @@ oc new-project bookinfo
 ```
 
 ## Control Plane Deployment
-We need configure our control plane which will act as the central controller for the service mesh.
+We need to configure our control plane which will act as the central controller for the service mesh.
 
 1. Create `ServiceMeshControlPlane`, `ServiceMeshMember`, `ServiceMeshMemberRoll`, and `RoleBindings` resources 
    using the following command:
@@ -133,7 +133,7 @@ You should see that the traffic is routed to the v1 services.
 > Absolutely fun and entertaining. The play lacks thematic depth when compared to other plays by Shakespeare.
 > - Reviewer2
 
-6. Send some traffic using the following commad:
+6. Send some traffic using the following command:
 ```bash
 for i in {1..20}; do sleep 0.25; curl -I http://${GATEWAY_URL}/productpage; done
 ```
