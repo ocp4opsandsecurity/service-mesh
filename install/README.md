@@ -70,7 +70,7 @@ oc apply -f ./install/control-plane.yaml
 
 2. Get the control plane installation status using the following command:
 ```bash
-oc get smcp -n istio-system
+oc get smcp -n istio-system -w
 ```
 
 ## Application Deployment
@@ -80,8 +80,8 @@ We are going to deploy the bookinfo application.
 > [Set Default Routes For Services](https://istio.io/latest/docs/ops/best-practices/traffic-management/#set-default-routes-for-services)
 > **!!! Caution !!!**
 
-1. Destination rules configure what happens to traffic for that destination after virtual service routing
-   rules are evaluated. Apply `DestinationRule` to expose v1 destinations using the following command:
+1. Destination rules configure what happens to traffic after virtual service routing rules are evaluated. Apply 
+   `DestinationRule` to expose v1 destinations using the following command:
 ```bash
 oc apply -n bookinfo -f ./install/destination-rule-all.yaml
 ```
